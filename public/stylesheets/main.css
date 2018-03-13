@@ -1,7 +1,11 @@
 .jumbotron {
   background: #532F8C;
   color: white;
-  bottom:0px; }
+  height: 100%;
+  width:100%;
+  position:fixed; 
+  padding: 200px;}
+
   .jumbotron .btn-primary {
     background: #845ac7;
     border-color: #845ac7; }
@@ -34,9 +38,13 @@
 
 body {
   padding-top: 70px;
-  background: url('http://placehold.it/1920x1080') no-repeat center center fixed;
+  /*background: url('http://placehold.it/1920x1080') no-repeat center center fixed;*/
   -webkit-background-size: cover;
   -moz-background-size: cover;
   background-size: cover;
   -o-background-size: cover;
+}
+
+p {
+  font-size: 13pt;
 }
