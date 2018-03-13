@@ -1,15 +1,26 @@
 var express = require('express');
+    var app = express();
+
+var path    = require("path");
+
+// Set port
+var port = process.env.PORT || 5000;
+app.set('port', (port));
+
 var session = require('express-session');
 var User = require("./controllers/user.js");
-var app = express();
 
-app.set('port', (process.env.PORT || 5000));
+// initialize socket.io
+var io = require('socket.io').listen(app.listen(port));
 
 app.use(express.static(__dirname + '/public'));
 
 // views is directory for all template files
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
+
+
+
 
 // Set up an Express session, which is required for CASAuthentication. 
 app.use(session({
@@ -27,7 +38,8 @@ app.get('/', function(req, res) {
         });
     } else {
         // The user has authenticated. Display the app
-        res.render("pages/app", {
+        //res.sendFile(path.join(__dirname+'/views/pages/chat.html'));
+        res.render("pages/chat", {
             session: req.session
         });
     }
@@ -41,9 +53,9 @@ app.get('/contact', function(req, res) {
     res.render('pages/contact');
 });
 
-app.listen(app.get('port'), function() {
-  console.log('Node app is running on port', app.get('port'));
-});
+// app.listen(app.get('port'), function() {
+//   console.log('Node app is running on port', app.get('port'));
+// });
 
 
 var CASAuthentication = require('cas-authentication');
@@ -92,4 +104,22 @@ var remove_session = function(req, res, next) {
 // redirect the client to the CAS logout page. 
 app.get( '/logout', [remove_session, cas.logout], function(req,res) {
     res.redirect('/');
+});
+
+
+
+// CHAT
+
+io.on('connection', function(socket){
+  console.log('a user connected');
+  socket.on('disconnect', function(){
+    console.log('user disconnected');
+  });
+});
+
+io.on('connection', function(socket){
+  socket.on('chat message', function(msg){
+    io.emit('chat message', msg);
+    console.log('message: ' + msg);
+  });
 });

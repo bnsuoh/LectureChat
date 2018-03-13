@@ -1,7 +1,7 @@
 .jumbotron {
   background: #532F8C;
   color: white;
-  padding-bottom: 80px; }
+  bottom:0px; }
   .jumbotron .btn-primary {
     background: #845ac7;
     border-color: #845ac7; }
@@ -25,3 +25,18 @@
     .jumbotron .lang-logo img {
       max-width: 100%; }
 
+.navbar {
+  height: 5vh;
+}
+  .navbar a {
+    height: 5vh;
+  }
+
+body {
+  padding-top: 70px;
+  background: url('http://placehold.it/1920x1080') no-repeat center center fixed;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  background-size: cover;
+  -o-background-size: cover;
+}

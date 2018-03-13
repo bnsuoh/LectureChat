@@ -1,7 +1,7 @@
 {
-  "name": "node-js-getting-started",
+  "name": "lecture-chat",
   "version": "0.3.0",
-  "description": "A sample Node.js app using Express 4",
+  "description": "Lecture chat application",
   "engines": {
     "node": "8.9.1"
   },
@@ -16,7 +16,9 @@
     "ejs": "^2.5.6",
     "express": "^4.15.2",
     "express-session": "^1.15.6",
-    "jquery": "^3.3.1"
+    "jquery": "^3.3.1",
+    "npm": "^5.7.1",
+    "socket.io": "^2.0.4"
   },
   "devDependencies": {
     "request": "^2.81.0",
