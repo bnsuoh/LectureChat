@@ -1,8 +1,10 @@
+/* Jumbotron */
+
 .jumbotron {
   background: #532F8C;
   color: white;
   height: 100%;
-  width:100%;
+  width: 100%;
   position:fixed; 
   padding: 200px;}
 
@@ -15,36 +17,16 @@
     color: #d9ccee;
     max-width: 75%;
     margin: 1em auto 2em; }
-  .navbar + .jumbotron {
-    margin-top: -20px; }
-  .jumbotron .lang-logo {
-    display: block;
-    background: #B01302;
-    border-radius: 50%;
-    overflow: hidden;
-    width: 100px;
-    height: 100px;
-    margin: auto;
-    border: 2px solid white; }
-    .jumbotron .lang-logo img {
-      max-width: 100%; }
 
+/* Navbar */
 .navbar {
-  height: 5vh;
+  height: 6.8%;
 }
-  .navbar a {
-    height: 5vh;
-  }
 
 body {
   padding-top: 70px;
-  /*background: url('http://placehold.it/1920x1080') no-repeat center center fixed;*/
   -webkit-background-size: cover;
   -moz-background-size: cover;
   background-size: cover;
   -o-background-size: cover;
-}
-
-p {
-  font-size: 13pt;
 }

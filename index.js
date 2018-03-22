@@ -21,7 +21,6 @@ app.set('view engine', 'ejs');
 
 
 
-
 // Set up an Express session, which is required for CASAuthentication. 
 app.use(session({
     secret            : 'super secret key',
