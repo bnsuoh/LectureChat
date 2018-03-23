@@ -7,13 +7,15 @@
 <body>
 
   <% include ../partials/nav.ejs %>
-  <div class="container text-center">
-    <row>
-      <h2>Hello there, <%= session.user.netid %>!</h2>
-      <h4>You are logged in to Princeton Lecture Chat. Please continue by choosing an option from below:</h4>
-      <a type="button" class="btn btn-lg btn-default" href="/create">Create a New Chat</a>
-      <a type="button" class="btn btn-lg btn-default">Find an Existing Chat</a>
-    </row>
+  <div class="text-center" id="main-page">
+    <div class="container text-center">
+      <row>
+        <h2>Hello there, <%= session.user.netid %>!</h2>
+        <h4>You are logged in to Princeton Lecture Chat. Please continue by choosing an option from below:</h4>
+        <a type="button" class="btn btn-lg btn-default" href="/create">Create a New Chat</a>
+        <a type="button" class="btn btn-lg btn-default">Find an Existing Chat</a>
+      </row>
+    </div>
   </div>
 </body>
 </html>
