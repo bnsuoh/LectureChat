@@ -1,5 +1,5 @@
 // The domain and port on which the app is running
-var host = process.env.BASE_URL || 'http://localhost:5000'
+var host = 'https://princetonlecturechat.herokuapp.com/' || 'http://localhost:5000'
 module.exports.host = host
 
 // The domain and port on which the app is running
