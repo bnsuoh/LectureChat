@@ -30,14 +30,32 @@
     <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
     <script>
       $(function () {
+        
+        // id of room
+        var room = Number(window.location.href.match(/\/chat\/(\d+)$/)[1]);
+
+        // connect to socket
         var socket = io();
+
+        // on connection to server get the id of person's room
+        socket.on('connect', function(){
+          console.log("connecting");
+          socket.emit('cnct', {user: "user", room: room});
+        });
+
+        socket.on('receive', function(data){
+          console.log("here");
+          console.log("received msg " + data.msg);
+          $('#messages').append($('<li>').text(data.msg));
+        });
+
+        // send messages
         $('form').submit(function(){
-          socket.emit('chat message', $('#m').val());
+          console.log($('#m').val());
+          socket.emit('chat message', {user:"user", room: room, msg: $('#m').val()});
+          $('#messages').append($('<li>').text($('#m').val()));
           $('#m').val('');
           return false;
-        });
-        socket.on('chat message', function(msg){
-          $('#messages').append($('<li>').text(msg));
         });
       });
     </script>

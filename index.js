@@ -20,7 +20,6 @@ app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
 
 
-
 // Set up an Express session, which is required for CASAuthentication. 
 app.use(session({
     secret            : 'super secret key',
@@ -38,7 +37,7 @@ app.get('/', function(req, res) {
     } else {
         // The user has authenticated. Display the app
         //res.sendFile(path.join(__dirname+'/views/pages/chat.html'));
-        res.render("pages/chat", {
+        res.render("pages/app", {
             session: req.session
         });
     }
@@ -105,20 +104,55 @@ app.get( '/logout', [remove_session, cas.logout], function(req,res) {
     res.redirect('/');
 });
 
+// Middleware function to check whether user is authenticated
+function isAuthenticated(req, res, next) {
 
+  // if user is authenticated, continue to the next route
+  if (req.session.user)
+    return next();
+
+  // if user isn't logged in, redirect them to login page
+  res.redirect('/login');
+}
 
 // CHAT
 
-io.on('connection', function(socket){
-  console.log('a user connected');
-  socket.on('disconnect', function(){
-    console.log('user disconnected');
-  });
+// Create a chat room
+app.get('/create', isAuthenticated, function(req,res){
+
+    // Generate unique id for the room
+    var id = Math.round((Math.random() * 1000000));
+
+    // Redirect to the random room
+    res.redirect('/chat/'+id);
 });
 
-io.on('connection', function(socket){
-  socket.on('chat message', function(msg){
-    io.emit('chat message', msg);
-    console.log('message: ' + msg);
-  });
+app.get('/chat/:id', function(req,res){
+
+    // Render the chat view
+    console.log("looking for chat");
+    res.render("pages/chat", {
+        session: req.session
+    });
+});
+
+var chat = io.sockets.on('connection', function(socket){
+
+    socket.on('cnct', function(data){
+        console.log("connected to room " + data.room);
+        socket.join(data.room);
+    });
+
+    // Handle the sending of messages
+    socket.on('chat message', function(data){
+
+        // When the server receives a message, it sends it to the other person in the room.
+        socket.broadcast.to(data.room).emit('receive', data);
+        console.log("room: " + data.room + " msg: " + data.msg);
+    });
+
+    // Handle disconnect
+    socket.on('disconnect', function(){
+        console.log('user disconnected');
+    });
 });
