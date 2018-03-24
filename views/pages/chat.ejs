@@ -4,60 +4,27 @@
   <head>
     <title>Socket.IO chat</title>
     <% include ../partials/header.ejs %>
-    <style>
-      * { margin: 0; padding: 0; box-sizing: border-box; }
-      form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 70%; }
-      form input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
-      form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
-      #messages { list-style-type: none; margin: 0; padding: 0; }
-      #messages li { padding: 5px 10px; }
-      #messages li:nth-child(odd) { background: #eee; }
-    </style>
   </head>
 
   <body>
     <% include ../partials/nav.ejs %>
 
-    <div class="container">
-      <ul id="messages"></ul>
-      <form action="">
-        <input id="m" autocomplete="off" /><button>Send</button>
+      <div id="chat-page">
+        <div id="message-container" class="container">
+          <ul id="messages"></ul>
+        </div>
         
-      </form>
-    </div>
-
-  <script src="/socket.io/socket.io.js"></script>
+        <footer>
+          <div id="message-box" class="container">
+            <form action="">
+              <button><span class="glyphicon glyphicon-send"></span></button>
+              <textarea type="submit" id="m" autocomplete="off"></textarea>
+            </form>
+          </div>
+        </footer>
+      </div>
     <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
-    <script>
-      $(function () {
-        
-        // id of room
-        var room = Number(window.location.href.match(/\/chat\/(\d+)$/)[1]);
-
-        // connect to socket
-        var socket = io();
-
-        // on connection to server get the id of person's room
-        socket.on('connect', function(){
-          console.log("connecting");
-          socket.emit('cnct', {user: "user", room: room});
-        });
-
-        socket.on('receive', function(data){
-          console.log("here");
-          console.log("received msg " + data.msg);
-          $('#messages').append($('<li>').text(data.msg));
-        });
-
-        // send messages
-        $('form').submit(function(){
-          console.log($('#m').val());
-          socket.emit('chat message', {user:"user", room: room, msg: $('#m').val()});
-          $('#messages').append($('<li>').text($('#m').val()));
-          $('#m').val('');
-          return false;
-        });
-      });
-    </script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="../scripts/chat.js"></script>
   </body>
 </html>

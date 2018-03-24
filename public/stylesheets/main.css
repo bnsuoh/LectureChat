@@ -1,14 +1,21 @@
 
+:root {
+  --main-bg-color: #DFDCE3;
+  --second-color: #4ABDAC;
+  --third-color: #FC4A1A;
+}
+
 body {
   font-family: "Open Sans", sans-serif;
   height: 100%;
   width: 100%;
+  background-color: var(--main-bg-color);/*#DFDCE3*/
 }
 
 /* Jumbotron */
 
 .jumbotron {
-  background: #4ABDAC;
+  background: var(--second-color);
   color: white;
   height: 100%;
   width: 100%;
@@ -23,7 +30,7 @@ body {
 
   .jumbotron .btn:hover,
   .jumbotron .btn:active {
-    color: #4ABDAC;
+    color: var(--second-color);
     background: #fff;
     border-color: #fff;
   }
@@ -84,4 +91,110 @@ body {
 
 #main-page {
   padding-top: 8em;
+}
+
+.main-panel {
+  padding: 5em;
+  background-color: #fff;
+}
+
+  .main-panel .btn {
+    font-size: 1.2em;
+    border: 3px solid var(--second-color);
+    color: var(--second-color);
+  }
+
+  .main-panel .btn:hover,
+  .main-panel .btn:active {
+    color: #fff;
+    background: var(--second-color);
+    border-color: var(--second-color);
+  }
+
+  .main-panel #netid {
+    color: var(--third-color);
+  }
+
+  .main-panel h2 {
+    margin-bottom: 1em;
+  }
+  .main-panel h4 {
+    margin-bottom: 2em;
+  }
+
+/* Chat page*/
+#chat-page {
+  padding-top: 3em;
+  padding-bottom: 7em;
+}
+
+.message-container {
+  position: fixed;
+  top:0;
+  bottom:0;
+}
+
+#messages { 
+  list-style-type: none; 
+  margin-top: 2em; 
+  padding: 0; 
+}
+
+#messages li { 
+  padding: 5px 10px; 
+}
+
+#messages .me { 
+  background: #eee; 
+}
+
+footer {
+  position:fixed;
+  bottom:0;
+  left:0;
+  width:100%;
+  /*padding-top: 30px;*/
+  background-color: var(--main-bg-color);
+  height: 100px;
+}
+
+form {
+  position:relative;
+  width: 100%;
+  margin: 3px auto;
+  background-color: #fff;
+  border: 2px solid var(--main-bg-color);
+}
+
+form button { 
+  position:absolute;
+  top: 0px;
+  right:0px;
+  bottom: 0px;
+  width: 7%; 
+  background: #fff; 
+  font-size: 2em;
+  color: var(--second-color);
+  border: none; 
+  padding: 10px;
+  -webkit-transition: all 0.3s;
+  -moz-transition: all 0.3s;
+  transition: all 0.3s; 
+}
+
+form button:hover {
+  color: #555;
+}
+
+form #m {
+  position:relative;
+  /*background-color: #f9f9f9;*/
+  background-color: #fff;
+  width: 93%;
+  height: 50%;
+  padding: 12px 20px;
+  box-sizing: border-box;
+  border:none;
+  font-size: 16px;
+  resize: none;
 }

@@ -141,7 +141,6 @@ var chat = io.sockets.on('connection', function(socket){
     socket.on('cnct', function(data){
         console.log("connected to room " + data.room);
         socket.join(data.room);
-        socket.emit('previousMessages', allMessages);
     });
 
     // Handle the sending of messages
