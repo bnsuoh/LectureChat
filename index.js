@@ -18,6 +18,7 @@ app.use(express.static(__dirname + '/public'));
 // views is directory for all template files
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
+app.engine('js', require('ejs').renderFile);
 
 
 // Set up an Express session, which is required for CASAuthentication. 
@@ -127,7 +128,7 @@ app.get('/create', isAuthenticated, function(req,res){
     res.redirect('/chat/'+id);
 });
 
-app.get('/chat/:id', function(req,res){
+app.get('/chat/:id', isAuthenticated, function(req,res){
 
     // Render the chat view
     console.log("looking for chat");

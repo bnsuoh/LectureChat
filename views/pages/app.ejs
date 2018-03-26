@@ -11,7 +11,7 @@
     <div class="container text-center main-panel">
       <row>
         <h2>Hello there, <span id=netid><%= session.user.netid %></span>!</h2>
-        <h4>Your anonymous alias is <span id=netid>name</span>. Please continue by choosing an option from below:</h4>
+        <h4>Your anonymous alias is <span id=alias><%= session.user.alias %></span>. Please continue by choosing an option from below:</h4>
         <a type="button" class="btn btn-lg btn-default" href="/create">Create a New Chat</a>
         <a type="button" class="btn btn-lg btn-default">Find an Existing Chat</a>
       </row>

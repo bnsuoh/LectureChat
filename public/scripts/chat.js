@@ -3,7 +3,7 @@ $(function () {
 
     var messages = $("#messages");
     var messageBox = $('#m');
-
+    var alias = document.getElementById("user-alias").innerText;
 
     // id of room
     var room = Number(window.location.href.match(/\/chat\/(\d+)$/)[1]);
@@ -16,7 +16,7 @@ $(function () {
 
       var who = '';
 
-      if (user === "me") {
+      if (user === alias) {
         who = 'me';
       }
       else {
@@ -39,11 +39,10 @@ $(function () {
     // on connection to server get the id of person's room
     socket.on('connect', function(){
       console.log("connecting");
-      socket.emit('cnct', {user: "user", room: room});
+      socket.emit('cnct', {user: alias, room: room});
     });
 
     socket.on('receive', function(data){
-      console.log("here");
       console.log("received msg " + data.msg);
       createChatMessage(data.msg, data.user)
       // messages.append($('<li>').text(data.msg));
@@ -52,8 +51,8 @@ $(function () {
     // send messages
     $('form').submit(function(){
       console.log(messageBox.val());
-      socket.emit('chat message', {user:"user", room: room, msg: messageBox.val()});
-      createChatMessage(messageBox.val(), "me")
+      socket.emit('chat message', {user: alias, room: room, msg: messageBox.val()});
+      createChatMessage(messageBox.val(), alias)
       // messages.append($('<li>').text(messageBox.val()));
       messageBox.val('');
       return false;

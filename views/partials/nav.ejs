@@ -20,6 +20,7 @@
           <% if (!session.user) { %>
             <a href="/login" id="user_button"></span> Login</a>
           <% } else{ %>
+            <div id="user-alias" style="display: none;"><%= session.user.alias %></div>
             <li class="dropdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><%= session.user.netid %></a>
               <ul class="dropdown-menu" role="menu">
