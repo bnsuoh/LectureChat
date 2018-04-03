@@ -20,7 +20,6 @@ app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
 app.engine('js', require('ejs').renderFile);
 
-
 // Set up an Express session, which is required for CASAuthentication. 
 app.use(session({
     secret            : 'super secret key',
@@ -116,16 +115,68 @@ function isAuthenticated(req, res, next) {
   res.redirect('/login');
 }
 
-// CHAT
+/* ------------------------------------------------ CHAT ------------------------------------------------ */
+
+// Dictionary of existing chats in the format:
+// key: Chat name
+// value: Unique chat number
+var chats = {}
+
+var bodyParser = require('body-parser'),
+    form = require('express-form'),
+    field = form.field;
+
+app.use(bodyParser.json()); // support json encoded bodies
+app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 
 // Create a chat room
 app.get('/create', isAuthenticated, function(req,res){
 
-    // Generate unique id for the room
-    var id = Math.round((Math.random() * 1000000));
+    // Redirect to room creation page
+    res.render("pages/create", {
+        session: req.session
+    });
+});
 
-    // Redirect to the random room
-    res.redirect('/chat/'+id);
+app.post('/create', 
+
+    form(
+    field("chatroom").trim().required().is(/^[a-z\d\-_\s]+$/i),
+    field("moderators").trim().is(/^[a-z\d\-_\s]+$/i)
+    ),
+
+    function(req,res) {
+        if (req.form.isValid) {
+            var chatroom = req.body.chatroom
+            var mods = req.body.mods
+            console.log('Chatroom: ' + chatroom);
+            console.log('Mods: ' + mods);
+
+            if (!(chatroom in chats)) {
+                // Generate unique id for the room
+                var id;
+                var id_valid = false;
+                while (!id_valid) {
+                    id_valid = true;
+                    id = Math.round((Math.random() * 1000000));
+                    Object.keys(chats).forEach(function(key) {
+                        console.log("here");
+                        if (chats[key] == id) {
+                            id_valid = false;
+                        }
+                    });
+                }    
+                chats[chatroom] = id;
+                res.redirect('/chat/'+id);
+            }
+            else {
+                console.log("Chatroom name " + chatroom + " exists");
+                res.redirect('/create');
+            }
+            
+        } else {
+            res.redirect('/create');
+        }
 });
 
 app.get('/chat/:id', isAuthenticated, function(req,res){
