@@ -129,8 +129,13 @@ body {
 
 /* ---------------------------- Chat page  ---------------------------- */
 #chat-page {
-  padding-top: 3em;
+  padding-top: 4em;
   padding-bottom: 7em;
+}
+
+#chat-title {
+  text-align: center;
+  position: fixed;
 }
 
 .message-container {

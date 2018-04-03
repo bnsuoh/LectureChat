@@ -121,6 +121,13 @@ function isAuthenticated(req, res, next) {
 // key: Chat name
 // value: Unique chat number
 var chats = {}
+var users = []
+var mods = {}
+
+// Get key with value from dictionary
+function getKeyByValue(object, value) {
+  return Object.keys(object).find(key => object[key] == value);
+}
 
 var bodyParser = require('body-parser'),
     form = require('express-form'),
@@ -149,9 +156,6 @@ app.post('/create',
         if (req.form.isValid) {
             var chatroom = req.body.chatroom
             var mods = req.body.mods
-            console.log('Chatroom: ' + chatroom);
-            console.log('Mods: ' + mods);
-
             if (!(chatroom in chats)) {
                 // Generate unique id for the room
                 var id;
@@ -160,32 +164,44 @@ app.post('/create',
                     id_valid = true;
                     id = Math.round((Math.random() * 1000000));
                     Object.keys(chats).forEach(function(key) {
-                        console.log("here");
                         if (chats[key] == id) {
                             id_valid = false;
                         }
                     });
                 }    
                 chats[chatroom] = id;
-                res.redirect('/chat/'+id);
+                console.log("Creating chatroom with name " + chatroom + ".");
+                res.redirect('/chat/'+ id);
             }
             else {
-                console.log("Chatroom name " + chatroom + " exists");
+                console.log("Chatroom name " + chatroom + " already exists.");
                 res.redirect('/create');
             }
             
         } else {
+             console.log("Chatroom creation request incorrect.");
             res.redirect('/create');
         }
 });
 
 app.get('/chat/:id', isAuthenticated, function(req,res){
-
     // Render the chat view
-    console.log("looking for chat");
+    console.log(getKeyByValue(chats, req.params.id));
+
     res.render("pages/chat", {
+        chatroom: getKeyByValue(chats, req.params.id),
         session: req.session
     });
+});
+
+app.get('/search', isAuthenticated, function(req,res){
+    res.render("pages/search", {
+        session: req.session
+    });
+})
+
+app.get('/chats', cas.block, function ( req, res ) {
+    res.json(chats);
 });
 
 var chat = io.sockets.on('connection', function(socket){
