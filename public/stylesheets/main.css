@@ -1,4 +1,6 @@
 
+/* ---------------------------- General ---------------------------- */
+
 :root {
   --main-bg-color: #DFDCE3;
   --second-color: #4ABDAC;
@@ -9,10 +11,53 @@ body {
   font-family: "Open Sans", sans-serif;
   height: 100%;
   width: 100%;
-  background-color: var(--main-bg-color);/*#DFDCE3*/
+  background-color: var(--main-bg-color);
 }
 
-/* ---------------------------- Jumbotron ---------------------------- */
+/* Source for button styling: 
+   https://tympanus.net/Development/CreativeButtons/*/
+
+.btn {
+  border: none;
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+  background: none;
+  cursor: pointer;
+  padding: 25px 80px;
+  display: inline-block;
+  margin: 15px 30px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 700;
+  outline: none;
+  position: relative;
+  -webkit-transition: all 0.3s;
+  -moz-transition: all 0.3s;
+  transition: all 0.3s;
+  border-radius: 0px;
+}
+
+.btn:after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  -webkit-transition: all 0.3s;
+  -moz-transition: all 0.3s;
+  transition: all 0.3s;
+}
+
+/* ---------------------------- Navbar ---------------------------- */
+
+.navbar {
+  background-color: #fff;
+}
+
+.navbar li .active {
+  background-color: var(--second-color);
+}
+
+/* ---------------------------- Splash Page ---------------------------- */
 
 .jumbotron {
   background: var(--second-color);
@@ -50,38 +95,6 @@ body {
     margin: 1em auto 2em; 
     font-family: "Open Sans", sans-serif;}
 
-
-/* Source for button styling: https://tympanus.net/Development/CreativeButtons/*/
-
-.btn {
-  border: none;
-  font-family: inherit;
-  font-size: inherit;
-  color: inherit;
-  background: none;
-  cursor: pointer;
-  padding: 25px 80px;
-  display: inline-block;
-  margin: 15px 30px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  font-weight: 700;
-  outline: none;
-  position: relative;
-  -webkit-transition: all 0.3s;
-  -moz-transition: all 0.3s;
-  transition: all 0.3s;
-  border-radius: 0px;
-}
-
-.btn:after {
-  content: '';
-  position: absolute;
-  z-index: -1;
-  -webkit-transition: all 0.3s;
-  -moz-transition: all 0.3s;
-  transition: all 0.3s;
-}
 
 /* ---------------------------- Main page ---------------------------- */
 
@@ -127,6 +140,42 @@ body {
   text-align: center; 
 }
 
+/* ---------------------------- Search Chat Page ---------------------------- */
+
+#search-chat-page {
+  margin-top: 8em;
+}
+
+#search-chat-page .list-group-item {
+  border-radius: 0;
+  font-size: 1.2em;
+  border-style: none;
+  border-left: 5px solid var(--second-color);
+  margin-bottom: 4px;
+}
+
+#search-chat-page .list-group-item {
+  padding: 25px 25px;
+  font-weight: 700;
+  -webkit-transition: all 0.3s;
+  -moz-transition: all 0.3s;
+  transition: all 0.3s;
+}
+
+#search-chat-page .list-group-item:after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  -webkit-transition: all 0.3s;
+  -moz-transition: all 0.3s;
+  transition: all 0.3s;
+}
+
+#search-chat-page .list-group-item:hover {
+  background-color: var(--second-color);
+  color:#fff;
+}
+
 /* ---------------------------- Chat page  ---------------------------- */
 #chat-page {
   padding-top: 4em;
@@ -136,6 +185,7 @@ body {
 #chat-title {
   text-align: center;
   position: fixed;
+  font-weight: 800;
 }
 
 .message-container {
@@ -165,6 +215,7 @@ body {
   #messages .other b {
     color: var(--second-color);
   }
+
 #messages .me { 
   background: var(--second-color);
   color: #fff; 
@@ -175,12 +226,12 @@ body {
     color: #fff;
   }
 
-footer {
+/* Message box */
+#chat-page footer {
   position:fixed;
   bottom:0;
   left:0;
   width:100%;
-  /*padding-top: 30px;*/
   background-color: var(--main-bg-color);
   height: 100px;
 }
@@ -215,7 +266,6 @@ footer {
 
 #chat-page form #m {
   position:relative;
-  /*background-color: #f9f9f9;*/
   background-color: #fff;
   width: 93%;
   height: 50%;

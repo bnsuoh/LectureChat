@@ -43,9 +43,7 @@ $(function () {
     });
 
     socket.on('receive', function(data){
-      console.log("received msg " + data.msg);
       createChatMessage(data.msg, data.user)
-      // messages.append($('<li>').text(data.msg));
     });
 
     // send messages

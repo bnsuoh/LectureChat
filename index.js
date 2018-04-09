@@ -9,6 +9,7 @@ app.set('port', (port));
 
 var session = require('express-session');
 var User = require("./controllers/user.js");
+var DB = require("./controllers/database.js");
 
 // initialize socket.io
 var io = require('socket.io').listen(app.listen(port));
@@ -69,7 +70,9 @@ var cas = new CASAuthentication({
 // Unauthenticated clients will be redirected to the CAS login and then back to 
 // this route once authenticated. 
 app.get('/login', cas.bounce, function ( req, res ) {
-    var user = new User(req.session[ cas.session_name ]);
+    var user = new User({ netid: cas.session_name});
+    console.log(user.netid); // 'Silence'
+    //var user = new User(req.session[ cas.session_name ]);
     req.session.user = user;
     //app.set("user", user);
     res.redirect('/');

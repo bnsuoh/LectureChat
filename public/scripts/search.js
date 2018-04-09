@@ -3,6 +3,7 @@ $(function () {
 	var chatlist = $("#chat-list");
 	var chats = {}
 
+	// TODO: Add date created, mods etc
 	function createListElement(chatname) {
 		var li = $('<a href="/chat/' + chats[key] +
 			'" class="list-group-item list-group-item-action">'
