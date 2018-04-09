@@ -70,11 +70,16 @@ var cas = new CASAuthentication({
 // Unauthenticated clients will be redirected to the CAS login and then back to 
 // this route once authenticated. 
 app.get('/login', cas.bounce, function ( req, res ) {
-    var user = new User({ netid: cas.session_name});
-    console.log(user.netid); // 'Silence'
+    var user = new User({ netid: req.session[cas.session_name]});
+    
     //var user = new User(req.session[ cas.session_name ]);
     req.session.user = user;
     //app.set("user", user);
+
+    //Save user to database
+    user.save(function (err, fluffy) {
+        if (err) return console.error(err);
+    });
     res.redirect('/');
 });
  
