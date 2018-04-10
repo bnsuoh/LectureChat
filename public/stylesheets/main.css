@@ -141,13 +141,18 @@ body {
   text-align: center; 
 }
 
+#create-chat-page input {
+  border-radius: 0;
+}
+
 /* ---------------------------- Search Chat Page ---------------------------- */
 
 #search-chat-page .list-group-item {
   border-radius: 0;
   font-size: 1.2em;
   border-style: none;
-  border-left: 5px solid var(--second-color);
+  background-color: var(--second-color);
+  color:#fff;
   margin-bottom: 4px;
 }
 
@@ -169,18 +174,15 @@ body {
 }
 
 #search-chat-page .list-group-item:hover {
-  background-color: var(--second-color);
-  color:#fff;
+  background-color: var(--main-bg-color-color);
+  border-left: 5px solid var(--second-color);
+  color: var(--second-color);
 }
 
 /* ---------------------------- Chat page  ---------------------------- */
 #chat-page {
   padding-top: 4em;
   padding-bottom: 7em;
-}
-
-#chat-title {
-  font-weight: 800;
 }
 
 .message-container {
