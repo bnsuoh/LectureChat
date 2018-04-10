@@ -1,11 +1,11 @@
 # Princeton Lecture Chat
 
-There will be a ReadMe here that actually makes sense
+Beta version of this application is live at https://princetonlecturechat.herokuapp.com
 
 ## Running Locally
 
-...
+TODO
 
 ## Documentation
 
-...
+TODO
