@@ -1,22 +1,27 @@
 $(function () {
 
 	var chatlist = $("#chat-list");
-	var chats = {}
+	var main_message = $("#main-message");
 
 	// TODO: Add date created, mods etc
-	function createListElement(chatname) {
-		var li = $('<a href="/chat/' + chats[key] +
+	function createListElement(chat) {
+		var li = $('<a href="/chat/' + chat._id +
 			'" class="list-group-item list-group-item-action">'
-        	+ chatname + '</a>')
+        	+ chat.name + '</a>')
       	chatlist.append(li);
 	}
 
-	$.get('http://localhost:5000/chats', {}, function(data){
+	// Fetch chatrooms from the database
+	// TODO: change URL to heroku
+	$.get('http://localhost:5000/chatrooms', {}, function(data){
         chats = data;
-        for (key in chats) {
-    		var value = chats[key];
-    		createListElement(key);
-    	}
+        if (chats.length > 0) { 
+	        for (i in chats) {
+	    		createListElement(chats[i]);
+	    	}}
+	    else {
+	    	main_message.text("No chatrooms found.")
+	    }
     });
 	
 })

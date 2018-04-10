@@ -8,7 +8,12 @@ var port = process.env.PORT || 5000;
 app.set('port', (port));
 
 var session = require('express-session');
-var User = require("./controllers/user.js");
+
+// Models
+var UserModel = require("./models/user.js");
+
+// Database
+var mongoose = require('mongoose')
 var DB = require("./controllers/database.js");
 
 // initialize socket.io
@@ -52,10 +57,7 @@ app.get('/contact', function(req, res) {
     res.render('pages/contact');
 });
 
-// app.listen(app.get('port'), function() {
-//   console.log('Node app is running on port', app.get('port'));
-// });
-
+/* ------------------------------------------------ CAS Authentication ------------------------------------------------ */
 
 var CASAuthentication = require('cas-authentication');
 var config = require('./controllers/config.js');
@@ -70,17 +72,43 @@ var cas = new CASAuthentication({
 // Unauthenticated clients will be redirected to the CAS login and then back to 
 // this route once authenticated. 
 app.get('/login', cas.bounce, function ( req, res ) {
-    var user = new User({ netid: req.session[cas.session_name]});
     
-    //var user = new User(req.session[ cas.session_name ]);
-    req.session.user = user;
-    //app.set("user", user);
+    var netid = req.session[cas.session_name]
 
-    //Save user to database
-    user.save(function (err, fluffy) {
-        if (err) return console.error(err);
-    });
-    res.redirect('/');
+    UserModel.findById(netid, function (err, user) {
+        if (err) {
+            console.log("no here")
+            console.log(err)
+            res.sendStatus(500)
+            req.session.user = user;
+            return
+        }
+
+        // If the user doesn't exist, create a new user
+        if (user == null) {
+            console.log("here")
+            var newUser = new UserModel({
+              _id: netid
+            })
+            newUser.save(function (error) {
+              if (error) {
+                console.log(error)
+                res.sendStatus(500)
+                return
+              }
+            })
+            req.session.user = newUser;
+            res.redirect('/');
+        }
+        else {
+            req.session.user = user;
+            res.redirect('/');
+        }
+    })
+    
+
+    //var user = new User({ netid: netid});
+    //var user = new User(req.session[ cas.session_name ]);
 });
  
 // Unauthenticated clients will receive a 401 Unauthorized response instead of 
@@ -128,9 +156,9 @@ function isAuthenticated(req, res, next) {
 // Dictionary of existing chats in the format:
 // key: Chat name
 // value: Unique chat number
-var chats = {}
-var users = []
-var mods = {}
+
+var ChatroomModel = require("./models/chatroom.js");
+var MessageModel = require("./models/message.js");
 
 // Get key with value from dictionary
 function getKeyByValue(object, value) {
@@ -153,64 +181,113 @@ app.get('/create', isAuthenticated, function(req,res){
     });
 });
 
+// Create chat room after form is submitted
 app.post('/create', 
 
     form(
-    field("chatroom").trim().required().is(/^[a-z\d\-_\s]+$/i),
-    field("moderators").trim().is(/^[a-z\d\-_\s]+$/i)
+        field("chatroom").trim().required().is(/^[a-z\d\-_\s]+$/i),
+        field("moderators").trim().is(/^[a-z\d\-_\s]+$/i)
     ),
 
     function(req,res) {
         if (req.form.isValid) {
+
+            // name of chatroom
             var chatroom = req.body.chatroom
-            var mods = req.body.mods
-            if (!(chatroom in chats)) {
-                // Generate unique id for the room
-                var id;
-                var id_valid = false;
-                while (!id_valid) {
-                    id_valid = true;
-                    id = Math.round((Math.random() * 1000000));
-                    Object.keys(chats).forEach(function(key) {
-                        if (chats[key] == id) {
-                            id_valid = false;
-                        }
-                    });
-                }    
-                chats[chatroom] = id;
-                console.log("Creating chatroom with name " + chatroom + ".");
-                res.redirect('/chat/'+ id);
-            }
-            else {
-                console.log("Chatroom name " + chatroom + " already exists.");
-                res.redirect('/create');
-            }
+
+            // Netids of mods
+            var mods = function() {
+                var mods1 = req.body.mods.split(' ');
+                for (var mod in mods1) {
+                    if (mod == req.session.user._id) {
+                        console.log("user in mods")
+                        return mods1
+                    }
+                mods1.push(req.session.user._id);
+                return mods1
+            }}();
+
+            console.log("Trying to create chatroom with name " + chatroom);
+            ChatroomModel.findOne({ name: chatroom }, function(err, room) {
+                if (err) {
+                    console.log(error)
+                    res.sendStatus(500)
+                    return
+                }
+
+                // If the chat with name doesn't exist, create new chat
+                if (room == null) {
+                    var newChat = new ChatroomModel({
+                      _id: mongoose.Types.ObjectId(),
+                      name: chatroom,
+                      mods: mods,
+                      messages: []
+                    })
+                    newChat.save(function (error) {
+                      if (error) {
+                        console.log(error)
+                        res.sendStatus(500)
+                        return
+                      }
+                    })
+                    res.redirect('/chat/' + newChat._id);
+                }
+                else {
+                    console.log("Chatroom name " + chatroom + " already exists.");
+                    res.redirect('/create');
+                }
+            });
             
         } else {
-             console.log("Chatroom creation request incorrect.");
+             console.log("Incorrect input in chatroom creation.");
             res.redirect('/create');
         }
 });
 
+// Go to the chat with given id
 app.get('/chat/:id', isAuthenticated, function(req,res){
-    // Render the chat view
-    console.log(getKeyByValue(chats, req.params.id));
 
-    res.render("pages/chat", {
-        chatroom: getKeyByValue(chats, req.params.id),
-        session: req.session
+    // Render the chat view
+    ChatroomModel.findOne({_id: req.params.id}, function(err, room) {
+        if (err) {
+            console.log(error)
+            res.sendStatus(500);
+        }
+
+        if (room == null) {
+            console.log("Room does not exist");
+            res.send(500, "Sorry, this chatroom does not exist");
+        }
+
+        else {
+            res.render("pages/chat", {
+                chatroom: room,
+                session: req.session
+            });
+        }
     });
 });
 
+// Handle call to search page
 app.get('/search', isAuthenticated, function(req,res){
     res.render("pages/search", {
         session: req.session
-    });
+    })
+})
+    
+// Fetch all existing chatrooms from database, and render search page
+app.get('/chatrooms', isAuthenticated, function(req,res){
+    ChatroomModel.find(function (err, chatrooms) {
+        if (err) {
+            console.log(error)
+            res.sendStatus(500);
+            return
+        }
+        console.log("searching for chatrooms")
+        res.send(chatrooms) 
+    })
 })
 
-app.get('/chats', cas.block, function ( req, res ) {
-    res.json(chats);
-});
 
 var chat = io.sockets.on('connection', function(socket){
 
