@@ -77,7 +77,6 @@ app.get('/login', cas.bounce, function ( req, res ) {
 
     UserModel.findById(netid, function (err, user) {
         if (err) {
-            console.log("no here")
             console.log(err)
             res.sendStatus(500)
             req.session.user = user;
@@ -86,7 +85,6 @@ app.get('/login', cas.bounce, function ( req, res ) {
 
         // If the user doesn't exist, create a new user
         if (user == null) {
-            console.log("here")
             var newUser = new UserModel({
               _id: netid
             })
@@ -105,10 +103,6 @@ app.get('/login', cas.bounce, function ( req, res ) {
             res.redirect('/');
         }
     })
-    
-
-    //var user = new User({ netid: netid});
-    //var user = new User(req.session[ cas.session_name ]);
 });
  
 // Unauthenticated clients will receive a 401 Unauthorized response instead of 
@@ -200,7 +194,6 @@ app.post('/create',
                 var mods1 = req.body.mods.split(' ');
                 for (var mod in mods1) {
                     if (mod == req.session.user._id) {
-                        console.log("user in mods")
                         return mods1
                     }
                 mods1.push(req.session.user._id);
@@ -261,7 +254,7 @@ app.get('/chat/:id', isAuthenticated, function(req,res){
 
         else {
             res.render("pages/chat", {
-                chatroom: room,
+                chatroom: room.name,
                 session: req.session
             });
         }
@@ -276,32 +269,76 @@ app.get('/search', isAuthenticated, function(req,res){
 })
     
 // Fetch all existing chatrooms from database, and render search page
-app.get('/chatrooms', isAuthenticated, function(req,res){
+app.get('/api/chatrooms', isAuthenticated, function(req,res){
     ChatroomModel.find(function (err, chatrooms) {
         if (err) {
             console.log(error)
             res.sendStatus(500);
             return
         }
-        console.log("searching for chatrooms")
         res.send(chatrooms) 
     })
 })
 
+// Fetch info about room with given ID
+app.get('/api/chat/id/:id', isAuthenticated, function(req,res){
+    ChatroomModel.findOne({_id: req.params.id}, function(err, room) {
+        if (err) {
+            console.log(error)
+            res.sendStatus(500);
+            return
+        }
+        res.send(room) 
+    })
+})
+
+// Fetch info about room with given name
+app.get('/api/chat/name/:name', isAuthenticated, function(req,res){
+    ChatroomModel.findOne({name: req.params.name}, function(err, room) {
+        if (err) {
+            console.log(error)
+            res.sendStatus(500);
+            return
+        }
+        res.send(room) 
+    })
+})
 
 var chat = io.sockets.on('connection', function(socket){
 
+    // Handle user connection
     socket.on('cnct', function(data){
-        console.log("connected to room " + data.room);
-        socket.join(data.room);
+        console.log("connected to room " + data.roomId);
+        socket.join(data.rooId);
     });
 
     // Handle the sending of messages
     socket.on('chat message', function(data){
-
         // When the server receives a message, it sends it to the other person in the room.
-        socket.broadcast.to(data.room).emit('receive', data);
-        console.log("room: " + data.room + " msg: " + data.msg);
+        socket.broadcast.to(data.roomId).emit('receive', data);
+        var newMessage = new Object({
+                _id: mongoose.Types.ObjectId(),
+                chatid: data.roomId,
+                senderAlias: data.alias,
+                senderNetid: data.netid,
+                timestamp: null,
+                text: data.msg
+            })
+            // Handle user connection
+        ChatroomModel.findOne({_id: data.roomId}, function(err, room) {
+            if (err) {
+                console.log(error)
+                res.sendStatus(500);
+                return
+            }
+            if (room != null) {
+                room.messages.push(newMessage);
+                room.save(function (error) {
+                    if (error) {console.log(error); res.sendStatus(500); return }
+                })
+            }
+        })
+        console.log("room: " + data.roomId + " msg: " + data.msg);
     });
 
     // Handle disconnect

@@ -22,7 +22,7 @@
           <% } else{ %>
             <div id="user-alias" style="display: none;"><%= session.user.alias %></div>
             <li class="dropdown">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><%= session.user._id %></a>
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false" id="user-netid"><%= session.user._id %></a>
               <ul class="dropdown-menu" role="menu">
                 <li><a href="/logout">Logout</a></li>
               </ul>

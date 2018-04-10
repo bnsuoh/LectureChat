@@ -13,8 +13,13 @@ var ChatroomSchema = new mongoose.Schema({
     	trim: true 
     }],
     messages: [{
-    	type: mongoose.Schema.ObjectId, 
-    	ref: 'Message'}]
+    	_id: String,
+        chatid: String,
+        senderAlias: String,
+        senderNetid: String,
+        timestamp: Date,
+        text: String
+    }]
 })
 
 var Chat = mongoose.model('Chat', ChatroomSchema)
