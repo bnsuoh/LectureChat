@@ -50,11 +50,15 @@ app.get('/', function(req, res) {
 });
 
 app.get('/about', function(req, res) {
-    res.render('pages/about');
+    res.render("pages/about", {
+        session: req.session
+    });
 });
 
 app.get('/contact', function(req, res) {
-    res.render('pages/contact');
+    res.render("pages/contact", {
+        session: req.session
+    });
 });
 
 /* ------------------------------------------------ CAS Authentication ------------------------------------------------ */
