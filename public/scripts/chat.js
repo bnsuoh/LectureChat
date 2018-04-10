@@ -9,19 +9,29 @@ $(function () {
 
     // id of room
     var roomId = String(window.location.href.match(/\/chat\/(.*)$/)[1]);
+    var mods = []
+
+    // list of mods in the room
+    $.get('/api/chatrooms/id/' + roomId, {}, function(data){
+      if (data != null) { mods = data.mods }
+    }); 
 
     // connect to socket
     var socket = io();
 
     // Add new chat message
-    function createChatMessage(msg, user){
+    function createChatMessage(msg, msg_alias, msg_netid){
       var who = '';
-      if (user === alias) {
-        who = 'me';
-      }
-      else {
-        who = 'other';
-      }
+      // Message is from self
+      if (msg_alias === alias) { who = 'me' }
+      // Message is from a moderator
+      else if (mods.includes(msg_netid)) { who = 'mod' }
+      // Message is from anyone else
+      else { who = 'other' }
+
+      var user = msg_alias;
+      if (who === 'mod') { user = '<span class="glyphicon glyphicon-user"></span>' + msg_netid }
+
       var li = $(
         '<li class=' + who + '>'+
           '<p><b>' + user + ':</b> ' + msg + '</p>' +
@@ -38,14 +48,14 @@ $(function () {
 
     // Receive chat message
     socket.on('receive', function(data){
-      createChatMessage(data.msg, data.alias)
+      createChatMessage(data.msg, data.alias, data.netid)
     });
 
     // send messages
     $('form').submit(function(){
-      console.log(messageBox.val());
+      //console.log(messageBox.val());
       socket.emit('chat message', {alias: alias, netid: netid, roomId: roomId, msg: messageBox.val()});
-      createChatMessage(messageBox.val(), alias)
+      createChatMessage(messageBox.val(), alias, netid)
       // messages.append($('<li>').text(messageBox.val()));
       messageBox.val('');
       return false;

@@ -180,8 +180,6 @@ body {
 }
 
 #chat-title {
-  text-align: center;
-  position: fixed;
   font-weight: 800;
 }
 
@@ -196,6 +194,7 @@ body {
   margin-top: 2em; 
   padding: 0; 
 }
+
 #messages li { 
   padding: 15px 20px; 
   margin: 0.5em;
@@ -204,6 +203,11 @@ body {
   max-width: 70%;
   word-wrap: break-word;
 }
+
+#messages p {
+  margin: 5px 0 5px 0;
+}
+
 #messages .other {
   background: #fff;
   float: left;
@@ -216,11 +220,24 @@ body {
 #messages .me { 
   background: var(--second-color);
   color: #fff; 
-  float:right;
-  clear:both;
+  float: right;
+  clear: both;
 }
   #messages .me b {
     color: #fff;
+  }
+
+#messages .mod {
+  background: #fff;
+  float: left;
+  clear: both;
+}
+  #messages .mod b {
+    color: var(--third-color);
+  }
+
+  #messages .mod span {
+    margin-right: 5px;
   }
 
 /* Message box */

@@ -285,7 +285,7 @@ app.get('/api/chatrooms', isAuthenticated, function(req,res){
 })
 
 // Fetch info about room with given ID
-app.get('/api/chat/id/:id', isAuthenticated, function(req,res){
+app.get('/api/chatrooms/id/:id', isAuthenticated, function(req,res){
     ChatroomModel.findOne({_id: req.params.id}, function(err, room) {
         if (err) {
             console.log(error)
@@ -297,7 +297,7 @@ app.get('/api/chat/id/:id', isAuthenticated, function(req,res){
 })
 
 // Fetch info about room with given name
-app.get('/api/chat/name/:name', isAuthenticated, function(req,res){
+app.get('/api/chatrooms/name/:name', isAuthenticated, function(req,res){
     ChatroomModel.findOne({name: req.params.name}, function(err, room) {
         if (err) {
             console.log(error)
@@ -313,7 +313,7 @@ var chat = io.sockets.on('connection', function(socket){
     // Handle user connection
     socket.on('cnct', function(data){
         console.log("connected to room " + data.roomId);
-        socket.join(data.rooId);
+        socket.join(data.roomId);
     });
 
     // Handle the sending of messages
