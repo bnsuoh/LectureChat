@@ -66,7 +66,7 @@ var config = require('./controllers/config.js');
 var cas = new CASAuthentication({
     cas_url     : 'https://fed.princeton.edu/cas/',
     service_url : config.host,
-    cas_version: "saml1.1"
+    cas_version : "saml1.1"
 });
  
 // Unauthenticated clients will be redirected to the CAS login and then back to 
