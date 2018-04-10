@@ -25,7 +25,7 @@ var User = mongoose.model('User', UserSchema)
 // Set a random alias to this user that won't be persistent
 // in the database
 UserSchema.virtual('alias').get(function () {
-  return "student" + Math.round(Math.random() * 1000000)
+  return "user" + Math.round(Math.random() * 1000000)
 });
 
 module.exports = User
