@@ -154,6 +154,7 @@ body {
   background-color: var(--second-color);
   color:#fff;
   margin-bottom: 4px;
+  border: 3px solid var(--second-color);
 }
 
 #search-chat-page .list-group-item {
@@ -175,7 +176,7 @@ body {
 
 #search-chat-page .list-group-item:hover {
   background-color: var(--main-bg-color-color);
-  border-left: 5px solid var(--second-color);
+  /*border: 3px solid var(--second-color);*/
   color: var(--second-color);
 }
 
