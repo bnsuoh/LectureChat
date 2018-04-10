@@ -1,6 +1,6 @@
 # Princeton Lecture Chat
 
-Beta version of this application is live at https://princetonlecturechat.herokuapp.com
+Alpha version of this application is live at https://princetonlecturechat.herokuapp.com
 
 ## Running Locally
 
