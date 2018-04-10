@@ -9,7 +9,8 @@ $(function () {
 
     // id of room
     var roomId = String(window.location.href.match(/\/chat\/(.*)$/)[1]);
-    var mods = []
+
+    var mods = []  // list of mods
 
     // list of mods in the room
     $.get('/api/chatrooms/id/' + roomId, {}, function(data){
@@ -21,13 +22,11 @@ $(function () {
 
     // Add new chat message
     function createChatMessage(msg, msg_alias, msg_netid){
+      // Message sender
       var who = '';
-      // Message is from self
-      if (msg_alias === alias) { who = 'me' }
-      // Message is from a moderator
-      else if (mods.includes(msg_netid)) { who = 'mod' }
-      // Message is from anyone else
-      else { who = 'other' }
+      if (msg_alias === alias) { who = 'me' } //from self
+      else if (mods.includes(msg_netid)) { who = 'mod' } //from mod
+      else { who = 'other' } // from other
 
       var user = msg_alias;
       if (who === 'mod') { user = '<span class="glyphicon glyphicon-user"></span>' + msg_netid }
@@ -61,6 +60,7 @@ $(function () {
       return false;
     });
 
+    // Send message by clicking Enter but don't refresh the page
     messageBox.keydown(function (event) {
       var keypressed = event.keyCode || event.which;
       if (keypressed == 13) {

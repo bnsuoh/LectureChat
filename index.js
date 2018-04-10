@@ -1,15 +1,14 @@
+// Set up express
 var express = require('express');
     var app = express();
-
 var path    = require("path");
+var session = require('express-session');
 
 // Set port
 var port = process.env.PORT || 5000;
-app.set('port', (port));
+    app.set('port', (port));
 
-var session = require('express-session');
-
-// Models
+// Import user model
 var UserModel = require("./models/user.js");
 
 // Database
@@ -33,28 +32,30 @@ app.use(session({
     saveUninitialized : true
 }));
 
+// Route to home page depends on whether the user is authenticated or not
 app.get('/', function(req, res) {
     // Check whether the user has authenticated
     if (!req.session.user) {
-        // The user in unauthenticated. Display a splash page.
+        // The user in unauthenticated. Display the splash page.
         res.render("pages/splash", {
             session: req.session
         });
     } else {
         // The user has authenticated. Display the app
-        //res.sendFile(path.join(__dirname+'/views/pages/chat.html'));
         res.render("pages/app", {
             session: req.session
         });
     }
 });
 
+// About page
 app.get('/about', function(req, res) {
     res.render("pages/about", {
         session: req.session
     });
 });
 
+// Contact page
 app.get('/contact', function(req, res) {
     res.render("pages/contact", {
         session: req.session
@@ -63,6 +64,7 @@ app.get('/contact', function(req, res) {
 
 /* ------------------------------------------------ CAS Authentication ------------------------------------------------ */
 
+// Import CAS
 var CASAuthentication = require('cas-authentication');
 var config = require('./controllers/config.js');
  
@@ -77,6 +79,7 @@ var cas = new CASAuthentication({
 // this route once authenticated. 
 app.get('/login', cas.bounce, function ( req, res ) {
     
+    // Netid attached to current session, if it exists
     var netid = req.session[cas.session_name]
 
     UserModel.findById(netid, function (err, user) {
@@ -87,7 +90,7 @@ app.get('/login', cas.bounce, function ( req, res ) {
             return
         }
 
-        // If the user doesn't exist, create a new user
+        // If user doesn't exist in the database, create a new user
         if (user == null) {
             var newUser = new UserModel({
               _id: netid
@@ -115,8 +118,7 @@ app.get( '/api', cas.block, function ( req, res ) {
     res.json( { success: true });
 });
  
-// An example of accessing the CAS user session variable. This could be used to 
-// retrieve your own local user records based on authenticated CAS username. 
+// API call for the CAS user session variable.
 app.get( '/api/user', cas.block, function ( req, res ) {
     res.json( { netid: req.session[ cas.session_name ] } );
 });
@@ -139,30 +141,22 @@ app.get( '/logout', [remove_session, cas.logout], function(req,res) {
 });
 
 // Middleware function to check whether user is authenticated
+// TODO: remove this and try using cas.block instead? Rip, didn't know that was a thing
 function isAuthenticated(req, res, next) {
-
   // if user is authenticated, continue to the next route
   if (req.session.user)
     return next();
-
   // if user isn't logged in, redirect them to login page
   res.redirect('/login');
 }
 
 /* ------------------------------------------------ CHAT ------------------------------------------------ */
 
-// Dictionary of existing chats in the format:
-// key: Chat name
-// value: Unique chat number
-
+// Inport database models
 var ChatroomModel = require("./models/chatroom.js");
 var MessageModel = require("./models/message.js");
 
-// Get key with value from dictionary
-function getKeyByValue(object, value) {
-  return Object.keys(object).find(key => object[key] == value);
-}
-
+// Body parser to get form inputs
 var bodyParser = require('body-parser'),
     form = require('express-form'),
     field = form.field;
@@ -170,10 +164,8 @@ var bodyParser = require('body-parser'),
 app.use(bodyParser.json()); // support json encoded bodies
 app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 
-// Create a chat room
+// Redirect to chatroom creation page
 app.get('/create', isAuthenticated, function(req,res){
-
-    // Redirect to room creation page
     res.render("pages/create", {
         session: req.session
     });
@@ -181,20 +173,14 @@ app.get('/create', isAuthenticated, function(req,res){
 
 // Create chat room after form is submitted
 app.post('/create', 
-
     form(
         field("chatroom").trim().required().is(/^[a-z\d\-_\s]+$/i),
         field("moderators").trim().is(/^[a-z\d\-_\s]+$/i)
     ),
-
     function(req,res) {
         if (req.form.isValid) {
-
-            // name of chatroom
-            var chatroom = req.body.chatroom
-
-            // Netids of mods
-            var mods = function() {
+            var chatroom = req.body.chatroom // name of chatroom
+            var mods = function() { // Netids of mods
                 var mods1 = req.body.mods.split(' ');
                 for (var mod in mods1) {
                     if (mod === req.session.user._id) {
@@ -205,6 +191,8 @@ app.post('/create',
             }}();
 
             console.log("Trying to create chatroom with name " + chatroom);
+
+            // Add chatroom to database
             ChatroomModel.findOne({ name: chatroom }, function(err, room) {
                 if (err) {
                     console.log(error)
@@ -230,13 +218,13 @@ app.post('/create',
                     res.redirect('/chat/' + newChat._id);
                 }
                 else {
-                    console.log("Chatroom name " + chatroom + " already exists.");
+                    // TODO: add error message
                     res.redirect('/create');
                 }
             });
             
         } else {
-             console.log("Incorrect input in chatroom creation.");
+            // TODO: add error message
             res.redirect('/create');
         }
 });
@@ -244,7 +232,7 @@ app.post('/create',
 // Go to the chat with given id
 app.get('/chat/:id', isAuthenticated, function(req,res){
 
-    // Render the chat view
+    // Render the chat view for chatroom with given id
     ChatroomModel.findOne({_id: req.params.id}, function(err, room) {
         if (err) {
             console.log(error)
@@ -308,8 +296,8 @@ app.get('/api/chatrooms/name/:name', isAuthenticated, function(req,res){
     })
 })
 
+// Chatroom sockets and message transfer
 var chat = io.sockets.on('connection', function(socket){
-
     // Handle user connection
     socket.on('cnct', function(data){
         console.log("connected to room " + data.roomId);
@@ -317,8 +305,8 @@ var chat = io.sockets.on('connection', function(socket){
     });
 
     // Handle the sending of messages
+    // When the server receives a message, it sends it to the other person in the room.
     socket.on('chat message', function(data){
-        // When the server receives a message, it sends it to the other person in the room.
         socket.broadcast.to(data.roomId).emit('receive', data);
         var newMessage = new Object({
             _id: mongoose.Types.ObjectId(),
@@ -328,7 +316,7 @@ var chat = io.sockets.on('connection', function(socket){
             timestamp: null,
             text: data.msg
         })
-        // Handle user connection
+        // Update the chatroom data on mongo by adding the new message
         ChatroomModel.findOne({_id: data.roomId}, function(err, room) {
             if (err) {
                 console.log(error)
@@ -345,7 +333,7 @@ var chat = io.sockets.on('connection', function(socket){
         console.log("room: " + data.roomId + " msg: " + data.msg);
     });
 
-    // Handle disconnect
+    // Handle disconnected user
     socket.on('disconnect', function(){
         console.log('user disconnected');
     });

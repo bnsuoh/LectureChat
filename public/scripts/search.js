@@ -12,7 +12,6 @@ $(function () {
 	}
 
 	// Fetch chatrooms from the database
-	// TODO: change URL to heroku
 	$.get('/api/chatrooms', {}, function(data){
         chats = data;
         if (chats.length > 0) { 
