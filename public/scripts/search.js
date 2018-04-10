@@ -13,7 +13,7 @@ $(function () {
 
 	// Fetch chatrooms from the database
 	// TODO: change URL to heroku
-	$.get('http://localhost:5000/api/chatrooms', {}, function(data){
+	$.get('/api/chatrooms', {}, function(data){
         chats = data;
         if (chats.length > 0) { 
 	        for (i in chats) {
