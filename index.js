@@ -197,7 +197,7 @@ app.post('/create',
             var mods = function() {
                 var mods1 = req.body.mods.split(' ');
                 for (var mod in mods1) {
-                    if (mod == req.session.user._id) {
+                    if (mod === req.session.user._id) {
                         return mods1
                     }
                 mods1.push(req.session.user._id);
@@ -321,14 +321,14 @@ var chat = io.sockets.on('connection', function(socket){
         // When the server receives a message, it sends it to the other person in the room.
         socket.broadcast.to(data.roomId).emit('receive', data);
         var newMessage = new Object({
-                _id: mongoose.Types.ObjectId(),
-                chatid: data.roomId,
-                senderAlias: data.alias,
-                senderNetid: data.netid,
-                timestamp: null,
-                text: data.msg
-            })
-            // Handle user connection
+            _id: mongoose.Types.ObjectId(),
+            chatid: data.roomId,
+            senderAlias: data.alias,
+            senderNetid: data.netid,
+            timestamp: null,
+            text: data.msg
+        })
+        // Handle user connection
         ChatroomModel.findOne({_id: data.roomId}, function(err, room) {
             if (err) {
                 console.log(error)
