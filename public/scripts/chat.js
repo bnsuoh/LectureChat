@@ -44,7 +44,7 @@ $(function () {
       if (who === 'mod') { user = '<span class="glyphicon glyphicon-user"></span>' + msg_netid }
       var li = $(
         '<li id=' + msg_id + 
-          ' class=' + who + '>'+
+          ' class="msg ' + who + '">'+
           '<p>' + (mods.includes(netid)? 
           '<a class="glyphicon glyphicon-remove mod-only deleteButton" onclick="deleteMessage(\'' + msg_id + '\');"></a>':'') +
           '<b>' + user + ':</b> ' + msg + '</p>' +
@@ -53,11 +53,27 @@ $(function () {
       messages.append(li);
     }
 
+    function createStatusMessage(usr_alias, status) {
+      var li = $(
+        '<li class="status text-center"><b>' + usr_alias + "</b> just " + status + "</li>")
+      messages.append(li);
+    }
+
     // On connection to server get the id of person's room
     socket.on('connect', function(){
       console.log("connecting");
-      socket.emit('cnct', {user: alias, roomId: roomId});
+      socket.emit('cnct', {alias: alias, roomId: roomId});
     });
+
+    // New user connected to the chatroom
+    socket.on('joined', function(data) {
+      createStatusMessage(data.alias, "joined");
+    })
+
+    // A user left the chatroom
+    socket.on('left', function(data) {
+      createStatusMessage(data.alias, "left");
+    })
 
     // Receive chat message
     socket.on('receive', function(data){

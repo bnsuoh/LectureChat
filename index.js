@@ -138,7 +138,9 @@ app.get( '/api/alias', cas.block, function ( req, res ) {
  
 // Unauthenticated clients will be redirected to the CAS login and then to the 
 // provided "redirectTo" query parameter once authenticated. 
-app.get( '/authenticate', cas.bounce_redirect );
+app.get( '/authenticate', cas.bounce_redirect, function(req,res) {
+    var netid = req.session[cas.session_name]
+});
  
 // Deletes session and user information
 var remove_session = function(req, res, next) {
@@ -335,7 +337,10 @@ var chat = io.sockets.on('connection', function(socket){
     // Handle user connection
     socket.on('cnct', function(data){
         console.log("connected to room " + data.roomId);
+        socket.username = data.alias;
+        socket.room = data.roomId;
         socket.join(data.roomId);
+        socket.broadcast.to(data.roomId).emit('joined', data);
     });
 
     // Handle the sending of messages
@@ -376,7 +381,13 @@ var chat = io.sockets.on('connection', function(socket){
     })
 
     // Handle disconnected user
-    socket.on('disconnect', function(){
-        
+    socket.on('disconnect', function() {
+        console.log("disconnected from " + socket.room)
+        socket.broadcast.to(this.room).emit('left', {
+            room: this.room,
+            alias: this.username
+        });
+        // leave the room
+        socket.leave(socket.room);
     });
 });

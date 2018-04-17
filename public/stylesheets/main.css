@@ -243,6 +243,14 @@ body {
     margin-right: 5px;
   }
 
+#messages .status {
+  margin: 0.1em;
+  padding: 0.1em;
+  clear: both;
+  float: center;
+  max-width: 100%;
+}
+
 #messages a {
   margin-right: 3px;
   text-decoration: none;
