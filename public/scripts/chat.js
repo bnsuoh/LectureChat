@@ -1,16 +1,17 @@
+var messages = $("#messages");
+var messageBox = $('#m');
+
+var alias = document.getElementById("user-alias").innerText;
+var netid = document.getElementById("user-netid").innerText;
+
+// id of room
+var roomId = String(window.location.href.match(/\/chat\/(.*)$/)[1]);
+
+var mods = []  // list of mods
+
+var socket = null;
 
 $(function () {
-
-    var messages = $("#messages");
-    var messageBox = $('#m');
-
-    var alias = document.getElementById("user-alias").innerText;
-    var netid = document.getElementById("user-netid").innerText;
-
-    // id of room
-    var roomId = String(window.location.href.match(/\/chat\/(.*)$/)[1]);
-
-    var mods = []  // list of mods
 
     // list of mods in the room
     $.get('/api/chatrooms/id/' + roomId, {}, function(data){
@@ -18,10 +19,10 @@ $(function () {
     }); 
 
     // connect to socket
-    var socket = io();
+    socket = io();
 
     // Add new chat message
-    function createChatMessage(msg, msg_alias, msg_netid){
+    function createChatMessage(msg, msg_alias, msg_netid, msg_id){
       // Message sender
       var who = '';
       if (msg_alias === alias) { who = 'me' } //from self
@@ -30,10 +31,11 @@ $(function () {
 
       var user = msg_alias;
       if (who === 'mod') { user = '<span class="glyphicon glyphicon-user"></span>' + msg_netid }
-
       var li = $(
-        '<li class=' + who + '>'+
-          '<p><b>' + user + ':</b> ' + msg + '</p>' +
+        '<li id=' + msg_id + 
+          ' class=' + who + '>'+
+          '<p><a class="glyphicon glyphicon-remove mod-only deleteButton" onclick="deleteMessage(\'' + msg_id + '\');"></a>' +
+          '<b>' + user + ':</b> ' + msg + '</p>' +
         '</li>');
 
       messages.append(li);
@@ -47,15 +49,25 @@ $(function () {
 
     // Receive chat message
     socket.on('receive', function(data){
-      createChatMessage(data.msg, data.alias, data.netid)
+      createChatMessage(data.msg, data.alias, data.netid, data.msgId)
+    });
+
+    // Remove message display
+    socket.on('delete', function(data){
+      var element = document.getElementById(data.msgId);
+      element.innerHTML = "<b>Deleted by a moderator</b>"
     });
 
     // send messages
     $('form').submit(function(){
       //console.log(messageBox.val());
-      socket.emit('chat message', {alias: alias, netid: netid, roomId: roomId, msg: messageBox.val()});
-      createChatMessage(messageBox.val(), alias, netid)
-      // messages.append($('<li>').text(messageBox.val()));
+      msgId = 0;
+      msg = messageBox.val()
+      socket.emit('chat message', 
+        {alias: alias, netid: netid, roomId: roomId, msgId: msgId, msg: msg},
+        function(res) {
+          createChatMessage(msg, alias, netid, res);
+        });
       messageBox.val('');
       return false;
     });
@@ -70,3 +82,12 @@ $(function () {
     });
 
 });
+
+// Delete message after a mod clicks on the cross button
+function deleteMessage(msg_id){
+  socket.emit('delete', {msgId: msg_id, roomId: roomId});
+  var element = document.getElementById(msg_id);
+  element.innerHTML = "<b>Deleted by a moderator</b>"
+  $.get('/chat/'+ roomId +'/delete/' + msg_id, {}, function(data){
+  });
+};

@@ -243,6 +243,18 @@ body {
     margin-right: 5px;
   }
 
+#messages a {
+  margin-right: 3px;
+  text-decoration: none;
+  color: var(--third-color);
+  cursor: pointer;
+  -webkit-filter: brightness(100%);
+}
+
+#messages a:hover {
+  -webkit-filter: brightness(70%);
+}
+
 /* Message box */
 #chat-page footer {
   position:fixed;

@@ -72,7 +72,15 @@ var config = require('./controllers/config.js');
 var cas = new CASAuthentication({
     cas_url     : 'https://fed.princeton.edu/cas/',
     service_url : config.host,
-    cas_version : "saml1.1"
+    cas_version : "saml1.1",
+    // cas_version     : '3.0',
+    renew           : false,
+    is_dev_mode     : false,
+    dev_mode_user   : '',
+    dev_mode_info   : {},
+    session_name    : 'cas_user',
+    session_info    : 'cas_userinfo',
+    destroy_session : false
 });
  
 // Unauthenticated clients will be redirected to the CAS login and then back to 
@@ -165,7 +173,7 @@ app.use(bodyParser.json()); // support json encoded bodies
 app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 
 // Redirect to chatroom creation page
-app.get('/create', isAuthenticated, function(req,res){
+app.get('/create', cas.bounce, function(req,res){
     res.render("pages/create", {
         session: req.session
     });
@@ -230,7 +238,7 @@ app.post('/create',
 });
 
 // Go to the chat with given id
-app.get('/chat/:id', isAuthenticated, function(req,res){
+app.get('/chat/:id', cas.bounce, function(req,res){
 
     // Render the chat view for chatroom with given id
     ChatroomModel.findOne({_id: req.params.id}, function(err, room) {
@@ -254,14 +262,44 @@ app.get('/chat/:id', isAuthenticated, function(req,res){
 });
 
 // Handle call to search page
-app.get('/search', isAuthenticated, function(req,res){
+app.get('/search', cas.bounce, function(req,res){
     res.render("pages/search", {
         session: req.session
     })
 })
+
+app.get('/chat/:chatId/delete/:messageId', cas.block, function(req,res){
+    ChatroomModel.findOne({_id: req.params.chatId}, function(err, room) {
+        console.log("Request to delete message with id: " + req.params.messageId)
+        console.log(req.session[cas.session_name])
+        if (err) {
+            console.log(error)
+            res.sendStatus(500);
+            return
+        }
+        var netid = req.session[cas.session_name];
+        if (room["mods"].includes(netid)) {
+            for (var i = 0; i < room["messages"].length; i++) {
+                var message = room["messages"][i];
+                if (message["id"] === req.params.messageId) {
+                    room["messages"].splice(i, i+1);
+                    console.log("updating room data");
+                    room.save(function (error) {
+                        if (error) {console.log(error); res.sendStatus(500); return }
+                    })
+                }
+            }
+        }
+        else {
+            console.log("User " + netid + "is not a moderator for chatroom " + room["name"]);
+            res.sendStatus(500);
+            return
+        }
+    })
+})
     
 // Fetch all existing chatrooms from database, and render search page
-app.get('/api/chatrooms', isAuthenticated, function(req,res){
+app.get('/api/chatrooms', cas.bounce, function(req,res){
     ChatroomModel.find(function (err, chatrooms) {
         if (err) {
             console.log(error)
@@ -273,7 +311,7 @@ app.get('/api/chatrooms', isAuthenticated, function(req,res){
 })
 
 // Fetch info about room with given ID
-app.get('/api/chatrooms/id/:id', isAuthenticated, function(req,res){
+app.get('/api/chatrooms/id/:id', cas.bounce, function(req,res){
     ChatroomModel.findOne({_id: req.params.id}, function(err, room) {
         if (err) {
             console.log(error)
@@ -285,7 +323,7 @@ app.get('/api/chatrooms/id/:id', isAuthenticated, function(req,res){
 })
 
 // Fetch info about room with given name
-app.get('/api/chatrooms/name/:name', isAuthenticated, function(req,res){
+app.get('/api/chatrooms/name/:name', cas.bounce, function(req,res){
     ChatroomModel.findOne({name: req.params.name}, function(err, room) {
         if (err) {
             console.log(error)
@@ -306,17 +344,20 @@ var chat = io.sockets.on('connection', function(socket){
 
     // Handle the sending of messages
     // When the server receives a message, it sends it to the other person in the room.
-    socket.on('chat message', function(data){
-        socket.broadcast.to(data.roomId).emit('receive', data);
+    socket.on('chat message', function(data, callback){
+        var msgId = mongoose.Types.ObjectId();
         var newMessage = new Object({
-            _id: mongoose.Types.ObjectId(),
+            _id: msgId,
             chatid: data.roomId,
             senderAlias: data.alias,
             senderNetid: data.netid,
             timestamp: null,
             text: data.msg
         })
+        data.msgId = msgId;
+        socket.broadcast.to(data.roomId).emit('receive', data);
         // Update the chatroom data on mongo by adding the new message
+        data.msgId = msgId;
         ChatroomModel.findOne({_id: data.roomId}, function(err, room) {
             if (err) {
                 console.log(error)
@@ -328,10 +369,17 @@ var chat = io.sockets.on('connection', function(socket){
                 room.save(function (error) {
                     if (error) {console.log(error); res.sendStatus(500); return }
                 })
+                callback(msgId);
             }
         })
         console.log("room: " + data.roomId + " msg: " + data.msg);
+
     });
+
+    // Delete a message
+    socket.on('delete', function(data){
+        socket.broadcast.to(data.roomId).emit('delete', {msgId: data.msgId});
+    })
 
     // Handle disconnected user
     socket.on('disconnect', function(){
