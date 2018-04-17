@@ -1,6 +1,7 @@
 var messages = $("#messages");
 var messageBox = $('#m');
 
+// Client alias
 var alias = null;
 $.getJSON('/api/alias', function(data){
   $.each(data, function(i, field){
@@ -8,6 +9,7 @@ $.getJSON('/api/alias', function(data){
   });
 });
 
+// Client netid
 var netid = null;
 $.getJSON('/api/netid', function(data){
   $.each(data, function(i, field){
@@ -17,31 +19,21 @@ $.getJSON('/api/netid', function(data){
 
 // id of room
 var roomId = String(window.location.href.match(/\/chat\/(.*)$/)[1]);
-
 var mods = []  // list of mods
 
 var socket = null;
 
 $(function () {
 
-    // list of mods in the room
-    $.get('/api/chatrooms/id/' + roomId, {}, function(data){
-      if (data != null) { mods = data.mods }
-    }); 
-
-    // connect to socket
-    socket = io();
-
     // Add new chat message
     function createChatMessage(msg, msg_alias, msg_netid, msg_id){
       // Message sender
-      var who = '';
-      if (msg_alias === alias) { who = 'me' } //from self
-      else if (mods.includes(msg_netid)) { who = 'mod' } //from mod
-      else { who = 'other' } // from other
+      var who = 'other';
+      if (msg_netid === netid) { who = 'me' } //from self
+      if (mods.includes(msg_netid)) { who += ' mod' } //from mod
 
       var user = msg_alias;
-      if (who === 'mod') { user = '<span class="glyphicon glyphicon-user"></span>' + msg_netid }
+      if (mods.includes(msg_netid)) { user = '<span class="glyphicon glyphicon-user"></span>' + msg_netid }
       var li = $(
         '<li id=' + msg_id + 
           ' class="msg ' + who + '">'+
@@ -53,12 +45,34 @@ $(function () {
       messages.append(li);
     }
 
+    // Create status messages
     function createStatusMessage(usr_alias, status) {
-      var li = $(
-        '<li class="status text-center"><b>' + usr_alias + "</b> just " + status + "</li>")
+      var li = '';
+      if (status === "joined") {
+        li = $( '<li class="status text-center"><b>' + usr_alias + "</b> just joined</li>") 
+      }
+      else if (status === "left") {
+        li = $( '<li class="status text-center"><b>' + usr_alias + "</b> just left</li>") 
+      }
       messages.append(li);
     }
 
+    // Populate previous messages and mods
+    $.get('/api/chatrooms/id/' + roomId, {}, function(data){
+      if (data != null) { 
+        mods = data.mods; 
+        for (i in data.messages) {
+          createChatMessage(data.messages[i].text, 
+            data.messages[i].senderAlias,
+            data.messages[i].senderNetid, 
+            data.messages[i]._id)
+        }
+      }
+    }); 
+
+    // connect to socket
+    socket = io();
+    
     // On connection to server get the id of person's room
     socket.on('connect', function(){
       console.log("connecting");
