@@ -1,8 +1,19 @@
 var messages = $("#messages");
 var messageBox = $('#m');
 
-var alias = document.getElementById("user-alias").innerText;
-var netid = document.getElementById("user-netid").innerText;
+var alias = null;
+$.getJSON('/api/alias', function(data){
+  $.each(data, function(i, field){
+    if (i === "alias") alias = field
+  });
+});
+
+var netid = null;
+$.getJSON('/api/netid', function(data){
+  $.each(data, function(i, field){
+    if (i === "netid") netid = field
+  });
+});
 
 // id of room
 var roomId = String(window.location.href.match(/\/chat\/(.*)$/)[1]);
@@ -34,7 +45,8 @@ $(function () {
       var li = $(
         '<li id=' + msg_id + 
           ' class=' + who + '>'+
-          '<p><a class="glyphicon glyphicon-remove mod-only deleteButton" onclick="deleteMessage(\'' + msg_id + '\');"></a>' +
+          '<p>' + (mods.includes(netid)? 
+          '<a class="glyphicon glyphicon-remove mod-only deleteButton" onclick="deleteMessage(\'' + msg_id + '\');"></a>':'') +
           '<b>' + user + ':</b> ' + msg + '</p>' +
         '</li>');
 
@@ -85,9 +97,11 @@ $(function () {
 
 // Delete message after a mod clicks on the cross button
 function deleteMessage(msg_id){
-  socket.emit('delete', {msgId: msg_id, roomId: roomId});
-  var element = document.getElementById(msg_id);
-  element.innerHTML = "<b>Deleted by a moderator</b>"
   $.get('/chat/'+ roomId +'/delete/' + msg_id, {}, function(data){
+    if (data == "OK") {
+      socket.emit('delete', {msgId: msg_id, roomId: roomId});
+      var element = document.getElementById(msg_id);
+      element.innerHTML = "<b>Deleted by a moderator</b>"
+    }
   });
 };

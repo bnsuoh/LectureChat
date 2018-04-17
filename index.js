@@ -127,8 +127,13 @@ app.get( '/api', cas.block, function ( req, res ) {
 });
  
 // API call for the CAS user session variable.
-app.get( '/api/user', cas.block, function ( req, res ) {
+app.get( '/api/netid', cas.block, function ( req, res ) {
     res.json( { netid: req.session[ cas.session_name ] } );
+});
+
+// API call for the CAS user session variable.
+app.get( '/api/alias', cas.block, function ( req, res ) {
+    res.json( { alias: req.session.user["alias"]} );
 });
  
 // Unauthenticated clients will be redirected to the CAS login and then to the 
@@ -147,16 +152,6 @@ var remove_session = function(req, res, next) {
 app.get( '/logout', [remove_session, cas.logout], function(req,res) {
     res.redirect('/');
 });
-
-// Middleware function to check whether user is authenticated
-// TODO: remove this and try using cas.block instead? Rip, didn't know that was a thing
-function isAuthenticated(req, res, next) {
-  // if user is authenticated, continue to the next route
-  if (req.session.user)
-    return next();
-  // if user isn't logged in, redirect them to login page
-  res.redirect('/login');
-}
 
 /* ------------------------------------------------ CHAT ------------------------------------------------ */
 
@@ -283,10 +278,11 @@ app.get('/chat/:chatId/delete/:messageId', cas.block, function(req,res){
                 var message = room["messages"][i];
                 if (message["id"] === req.params.messageId) {
                     room["messages"].splice(i, i+1);
-                    console.log("updating room data");
                     room.save(function (error) {
                         if (error) {console.log(error); res.sendStatus(500); return }
                     })
+                    console.log("Message removed");
+                    res.sendStatus(200);
                 }
             }
         }
@@ -372,8 +368,6 @@ var chat = io.sockets.on('connection', function(socket){
                 callback(msgId);
             }
         })
-        console.log("room: " + data.roomId + " msg: " + data.msg);
-
     });
 
     // Delete a message
@@ -383,6 +377,6 @@ var chat = io.sockets.on('connection', function(socket){
 
     // Handle disconnected user
     socket.on('disconnect', function(){
-        console.log('user disconnected');
+        
     });
 });
