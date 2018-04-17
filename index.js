@@ -88,6 +88,7 @@ var cas = new CASAuthentication({
 app.get('/login', cas.bounce, function ( req, res ) {
     
     // Netid attached to current session, if it exists
+    // Netid attached to current session, if it exists
     var netid = req.session[cas.session_name]
 
     UserModel.findById(netid, function (err, user) {
@@ -138,14 +139,27 @@ app.get( '/api/alias', cas.block, function ( req, res ) {
  
 // Unauthenticated clients will be redirected to the CAS login and then to the 
 // provided "redirectTo" query parameter once authenticated. 
-app.get( '/authenticate', cas.bounce_redirect, function(req,res) {
-    var netid = req.session[cas.session_name]
-});
+app.get( '/authenticate', cas.bounce_redirect);
  
 // Deletes session and user information
 var remove_session = function(req, res, next) {
     req.session.user = false;
     req.session.cas = false;
+    next();
+}
+
+var set_session = function(req, res, next) {
+    var netid = req.session[cas.session_name]
+    UserModel.findById(netid, function (err, user) {
+        if (err) {
+            console.log(err)
+            res.sendStatus(500)
+            req.session.user = user;
+        }
+        if (user != null) {
+            req.session.user = user;
+        }
+    })
     next();
 }
 
@@ -170,7 +184,7 @@ app.use(bodyParser.json()); // support json encoded bodies
 app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 
 // Redirect to chatroom creation page
-app.get('/create', cas.bounce, function(req,res){
+app.get('/create', [cas.bounce, set_session], function(req,res){
     res.render("pages/create", {
         session: req.session
     });
@@ -235,7 +249,7 @@ app.post('/create',
 });
 
 // Go to the chat with given id
-app.get('/chat/:id', cas.bounce, function(req,res){
+app.get('/chat/:id', [cas.bounce, set_session], function(req,res){
 
     // Render the chat view for chatroom with given id
     ChatroomModel.findOne({_id: req.params.id}, function(err, room) {
@@ -259,7 +273,7 @@ app.get('/chat/:id', cas.bounce, function(req,res){
 });
 
 // Handle call to search page
-app.get('/search', cas.bounce, function(req,res){
+app.get('/search', [cas.bounce, set_session], function(req,res){
     res.render("pages/search", {
         session: req.session
     })
@@ -297,7 +311,7 @@ app.get('/chat/:chatId/delete/:messageId', cas.block, function(req,res){
 })
     
 // Fetch all existing chatrooms from database, and render search page
-app.get('/api/chatrooms', cas.bounce, function(req,res){
+app.get('/api/chatrooms', cas.block, function(req,res){
     ChatroomModel.find(function (err, chatrooms) {
         if (err) {
             console.log(error)
@@ -309,7 +323,7 @@ app.get('/api/chatrooms', cas.bounce, function(req,res){
 })
 
 // Fetch info about room with given ID
-app.get('/api/chatrooms/id/:id', cas.bounce, function(req,res){
+app.get('/api/chatrooms/id/:id', cas.block, function(req,res){
     ChatroomModel.findOne({_id: req.params.id}, function(err, room) {
         if (err) {
             console.log(error)
@@ -321,7 +335,7 @@ app.get('/api/chatrooms/id/:id', cas.bounce, function(req,res){
 })
 
 // Fetch info about room with given name
-app.get('/api/chatrooms/name/:name', cas.bounce, function(req,res){
+app.get('/api/chatrooms/name/:name', cas.block, function(req,res){
     ChatroomModel.findOne({name: req.params.name}, function(err, room) {
         if (err) {
             console.log(error)
