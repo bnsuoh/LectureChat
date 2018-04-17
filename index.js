@@ -293,7 +293,7 @@ app.get('/chat/:chatId/delete/:messageId', cas.block, function(req,res){
             for (var i = 0; i < room["messages"].length; i++) {
                 var message = room["messages"][i];
                 if (message["id"] === req.params.messageId) {
-                    room["messages"].splice(i, i+1);
+                    room["messages"].splice(i, 1);
                     room.save(function (error) {
                         if (error) {console.log(error); res.sendStatus(500); return }
                     })
