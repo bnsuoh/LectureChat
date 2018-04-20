@@ -90,8 +90,8 @@ app.get('/login', cas.bounce, function ( req, res ) {
     // Netid attached to current session, if it exists
     // Netid attached to current session, if it exists
     var netid = req.session[cas.session_name]
-    console.log(cas);
-    console.log(req.session[cas.session_info])
+    // console.log(cas);
+    // console.log(req.session[cas.session_info])
 
     UserModel.findById(netid, function (err, user) {
         if (err) {
