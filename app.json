@@ -4,5 +4,7 @@
   "repository": "https://github.com/heroku/node-js-getting-started",
   "logo": "https://cdn.rawgit.com/heroku/node-js-getting-started/master/public/node.svg",
   "keywords": ["node", "express", "heroku"],
-  "image": "heroku/nodejs"
+  "image": "heroku/nodejs",
+  "content_security_policy": "script-src 'self' https://ajax.googleapis.com; object-src 'self'; font-src 'self'"
+
 }

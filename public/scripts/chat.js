@@ -1,5 +1,6 @@
 var messages = $("#messages");
 var messageBox = $('#m');
+var userCountLabel = $('#user-count');
 
 // Client alias
 var alias = null;
@@ -20,67 +21,25 @@ $.getJSON('/api/netid', function(data){
 // id of room
 var roomId = String(window.location.href.match(/\/chat\/(.*)$/)[1]);
 var mods = []  // list of mods
+var numOfUsers = 0
 
 var socket = null;
 
 $(function () {
 
-    // Add new chat message
-    function createChatMessage(msg, msg_alias, msg_netid, msg_id){
-      // Message sender
-      var who = 'other';
-      if (msg_netid === netid) { who = 'me' } //from self
-      if (mods.includes(msg_netid)) { who += ' mod' } //from mod
-
-      var user = msg_alias;
-      if (mods.includes(msg_netid)) { user = '<span class="glyphicon glyphicon-user"></span>' + msg_netid }
-      var li = $(
-        '<li id=' + msg_id + 
-          ' class="msg ' + who + '">'+
-          '<p>' + (mods.includes(netid)? 
-          '<a class="glyphicon glyphicon-remove mod-only deleteButton" onclick="deleteMessage(\'' + msg_id + '\');"></a>':'') +
-          '<b>' + user + ':</b> ' + msg + '</p>' +
-        '</li>');
-
-      messages.append(li);
-    }
-
-    // Create status messages
-    function createStatusMessage(usr_alias, status) {
-      var li = '';
-      if (status === "joined") {
-        li = $( '<li class="status text-center"><b>' + usr_alias + "</b> just joined</li>") 
-      }
-      else if (status === "left") {
-        li = $( '<li class="status text-center"><b>' + usr_alias + "</b> just left</li>") 
-      }
-      messages.append(li);
-    }
-
-    // Populate previous messages and mods
-    $.get('/api/chatrooms/id/' + roomId, {}, function(data){
-      if (data != null) { 
-        mods = data.mods; 
-        for (i in data.messages) {
-          createChatMessage(data.messages[i].text, 
-            data.messages[i].senderAlias,
-            data.messages[i].senderNetid, 
-            data.messages[i]._id)
-        }
-      }
-    }); 
-
-    // connect to socket
+    // Connect to socket
     socket = io();
     
     // On connection to server get the id of person's room
     socket.on('connect', function(){
-      console.log("connecting");
+      loadPreviousChats();
+      updateNumberOfUsers();
       socket.emit('cnct', {alias: alias, roomId: roomId});
     });
 
     // New user connected to the chatroom
     socket.on('joined', function(data) {
+      updateNumberOfUsers();
       createStatusMessage(data.alias, "joined");
     })
 
@@ -102,7 +61,6 @@ $(function () {
 
     // send messages
     $('form').submit(function(){
-      //console.log(messageBox.val());
       msgId = 0;
       msg = messageBox.val()
       socket.emit('chat message', 
@@ -123,6 +81,71 @@ $(function () {
       }
     });
 
+    // Add new chat message
+    function createChatMessage(msg, msg_alias, msg_netid, msg_id){
+      // Message sender
+      var who = 'other';
+      if (msg_netid === netid) { who = 'me' } //from self
+      if (mods.includes(msg_netid)) { who += ' mod' } //from mod
+
+      var user = msg_alias;
+      if (mods.includes(msg_netid)) { user = '<span class="glyphicon glyphicon-user"></span>' + msg_netid }
+      var li = $(
+        '<li id=' + msg_id + 
+          ' class="msg ' + who + '">'+ (mods.includes(netid)? 
+          '<a class="glyphicon glyphicon-remove mod-only deleteButton" onclick="deleteMessage(\'' + msg_id + '\');"></a>':'') +
+          '<b>' + user + '</b> <p style="display:inline">' + msg + '</p>' +
+        '</li>');
+
+      li.find('p').text(msg);
+      li.find('b').text(msg_alias + ":");
+      messages.append(li);
+      scrollToBottom();
+    }
+
+    // Create status messages
+    function createStatusMessage(usr_alias, status) {
+      var li = '';
+      if (status === "joined") {
+        li = $( '<li class="status text-center"><b>' + usr_alias + "</b> just joined</li>") 
+      }
+      else if (status === "left") {
+        li = $( '<li class="status text-center"><b>' + usr_alias + "</b> just left</li>") 
+      }
+      messages.append(li);
+      scrollToBottom();
+    }
+
+    // Populate previous messages and mods
+    function loadPreviousChats() {
+      $.get('/api/chatrooms/id/' + roomId, {}, function(data){
+        if (data != null) { 
+          mods = data.mods; 
+          for (i in data.messages) {
+            createChatMessage(data.messages[i].text, 
+              data.messages[i].senderAlias,
+              data.messages[i].senderNetid, 
+              data.messages[i]._id)
+          }
+        }
+        createStatusMessage(alias, "joined");
+      }); 
+    }
+
+    // Update the number of users in chatroom
+    function updateNumberOfUsers() {
+      if (this.numOfUsers == undefined) {
+          this.numOfUsers= 1;
+      } else {
+          this.numOfUsers++;
+      }
+      userCountLabel.text(numOfUsers + " online user(s)")
+    }
+
+    // Scroll to the bottom of chat
+    function scrollToBottom() {
+      window.scrollTo(0,document.body.scrollHeight);
+    }
 });
 
 // Delete message after a mod clicks on the cross button

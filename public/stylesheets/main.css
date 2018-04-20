@@ -47,8 +47,7 @@ body {
   transition: all 0.3s;
 }
 
-#main-page, 
-#about-page, 
+#main-page,  
 #contact-page,
 #create-chat-page, 
 #search-chat-page {
@@ -67,7 +66,7 @@ body {
 
 /* ---------------------------- Splash Page ---------------------------- */
 
-.jumbotron {
+#splash-page .jumbotron {
   background: var(--second-color);
   color: white;
   height: 100%;
@@ -75,20 +74,20 @@ body {
   position:fixed; 
   padding: 200px;}
 
-  .jumbotron .btn {
+  #splash-page .jumbotron .btn {
     font-size: 1.5em;
     border: 3px solid #fff;
     color: #fff;
   }
 
-  .jumbotron .btn:hover,
-  .jumbotron .btn:active {
+  #splash-page .jumbotron .btn:hover,
+  #splash-page .jumbotron .btn:active {
     color: var(--second-color);
     background: #fff;
     border-color: #fff;
   }
 
-  .jumbotron h1 {
+  #splash-page .jumbotron h1 {
     font-size: 7em;
     color: #fff;
     padding: 20px 5px;
@@ -97,13 +96,66 @@ body {
     font-family: 'Roboto', sans-serif;
   }
 
-  .jumbotron p {
+  #splash-page .jumbotron p {
     color: #fff;
     max-width: 75%;
     margin: 1em auto 2em; 
     font-family: "Open Sans", sans-serif;}
 
+/* ---------------------------- About page ---------------------------- */
 
+#about-page{
+  padding: 3em 0 3em 0;
+  background: #fff;
+}
+
+#about-page .jumbotron {
+  background: var(--second-color);
+  color: white;
+  width: 100%;
+  padding: 40px;
+  margin:0;
+}
+
+#about-page .jumbotron h2 {
+  font-size: 3em;
+  color: #fff;
+  padding: 5px 5px;
+  font-family: 'Roboto', sans-serif;
+}
+
+#about-page .jumbotron p {
+  color: #fff;
+  max-width: 75%;
+  margin: 0.5em auto 0.5em; 
+  font-family: "Open Sans", sans-serif;
+}
+
+#about-page h3 {
+  color: var(--second-color);
+  padding: 1em 0 0.2em 0;
+  font-weight: 700;
+}
+
+#about-page h4 {
+  font-weight: 800;
+}
+
+#about-page p {
+  margin-bottom: 2em;
+}
+
+#about-page a {
+  color: #666;
+}
+
+#about-page a:hover {
+  color: #888;
+}
+
+#about-page i {
+  margin: 0 4px 0 4px;
+}
 /* ---------------------------- Main page ---------------------------- */
 
 .main-panel {
@@ -194,7 +246,7 @@ body {
 
 #messages { 
   list-style-type: none; 
-  margin-top: 2em; 
+  margin-top: 4em; 
   padding: 0; 
 }
 
@@ -306,4 +358,24 @@ body {
   border:none;
   font-size: 16px;
   resize: none;
+}
+
+#chat-page #chat-title-holder {
+  position: fixed;
+  margin-top: -0.5em;
+  width:100%;
+  left: 50%;
+  transform: translate(-50%, 0);
+  background-color: #888;
+  color: #fff;
+  z-index: 1;
+}
+
+#chat-page #user-count {
+  float:right;
+  display:inline-block;
+}
+
+#chat-page #chat-title {
+  float:left;
 }
