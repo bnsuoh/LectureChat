@@ -98,7 +98,7 @@ $(function () {
         '</li>');
 
       li.find('p').text(msg);
-      li.find('b').text(msg_alias + ":");
+      // li.find('b').text(user + ":");
       messages.append(li);
       scrollToBottom();
     }

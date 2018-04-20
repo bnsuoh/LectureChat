@@ -211,8 +211,6 @@ app.post('/create',
                 return mods1
             }}();
 
-            console.log("Trying to create chatroom with name " + chatroom);
-
             // Add chatroom to database
             ChatroomModel.findOne({ name: chatroom }, function(err, room) {
                 if (err) {
@@ -236,6 +234,7 @@ app.post('/create',
                         return
                       }
                     })
+                    console.log("Chatroon with name " + chatroom + " created.")
                     res.redirect('/chat/' + newChat._id);
                 }
                 else {
