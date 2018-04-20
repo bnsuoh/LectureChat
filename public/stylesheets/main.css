@@ -194,7 +194,7 @@ body {
 
 #messages { 
   list-style-type: none; 
-  margin-top: 2em; 
+  margin-top: 4em; 
   padding: 0; 
 }
 
@@ -306,4 +306,24 @@ body {
   border:none;
   font-size: 16px;
   resize: none;
+}
+
+#chat-page #chat-title-holder {
+  position: fixed;
+  margin-top: -0.5em;
+  width:100%;
+  left: 50%;
+  transform: translate(-50%, 0);
+  background-color: #888;
+  color: #fff;
+  z-index: 1;
+}
+
+#chat-page #user-count {
+  float:right;
+  display:inline-block;
+}
+
+#chat-page #chat-title {
+  float:left;
 }

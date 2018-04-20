@@ -10,8 +10,11 @@
     <%- include('../partials/nav', {active: 'none'}) %>
 
       <div id="chat-page">
-        <div class="text-center">
-          <h4 class="text-center" id="chat-title"><%= chatroom %></h4>
+        <div class="text-center" id="chat-title-holder">
+          <div class="container">
+            <h4 id="chat-title"><b>Room:</b> <%= chatroom %></h4>
+            <h4 id="user-count">0 online users</h4>
+          </div>
         </div>
         <!-- <div id="chat-title" class="container">
           <h4> <%= chatroom %> </h4>
