@@ -362,7 +362,7 @@ var chat = io.sockets.on('connection', function(socket){
                 res.sendStatus(500);
                 return
             }
-            room.activeUserCount = room.activeUserCount + 1 || 0;
+            room.activeUserCount = room.activeUserCount + 1 || 1;
             room.save(function (error) {
                 if (error) {console.log(error); res.sendStatus(500); return }
             })
