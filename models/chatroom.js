@@ -19,7 +19,10 @@ var ChatroomSchema = new mongoose.Schema({
         senderNetid: String,
         timestamp: Date,
         text: String
-    }]
+    }],
+    activeUserCount: {
+        type: Number
+    }
 })
 
 var Chat = mongoose.model('Chat', ChatroomSchema)

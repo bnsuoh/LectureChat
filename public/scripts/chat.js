@@ -33,19 +33,19 @@ $(function () {
     // On connection to server get the id of person's room
     socket.on('connect', function(){
       loadPreviousChats();
+      socket.emit('cnct', {alias: alias, netid: netid, roomId: roomId});
       updateNumberOfUsers();
-      socket.emit('cnct', {alias: alias, roomId: roomId});
     });
 
     // New user connected to the chatroom
     socket.on('joined', function(data) {
       updateNumberOfUsers();
-      createStatusMessage(data.alias, "joined");
+      // createStatusMessage(data.alias, "joined");
     })
 
     // A user left the chatroom
     socket.on('left', function(data) {
-      createStatusMessage(data.alias, "left");
+      // createStatusMessage(data.alias, "left");
     })
 
     // Receive chat message
@@ -104,8 +104,10 @@ $(function () {
     }
 
     // Create status messages
-    function createStatusMessage(usr_alias, status) {
+    function createStatusMessage(usr_alias, usr_netid, status) {
       var li = '';
+      var user = usr_alias;
+      if (mods.includes(msg_netid)) { user = usr_netid }
       if (status === "joined") {
         li = $( '<li class="status text-center"><b>' + usr_alias + "</b> just joined</li>") 
       }
@@ -128,18 +130,16 @@ $(function () {
               data.messages[i]._id)
           }
         }
-        createStatusMessage(alias, "joined");
+        // createStatusMessage(alias, netid, "joined");
       }); 
     }
 
     // Update the number of users in chatroom
     function updateNumberOfUsers() {
-      if (this.numOfUsers == undefined) {
-          this.numOfUsers= 1;
-      } else {
-          this.numOfUsers++;
-      }
-      userCountLabel.text(numOfUsers + " online user(s)")
+      var numOfUsers = "N/A"
+      socket.emit('user count', {roomId: roomId}, function(res){
+        userCountLabel.text(res + " online user(s)")
+      });
     }
 
     // Scroll to the bottom of chat

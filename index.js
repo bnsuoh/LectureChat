@@ -203,13 +203,13 @@ app.post('/create',
             var chatroom = req.body.chatroom // name of chatroom
             var mods = function() { // Netids of mods
                 var mods1 = req.body.mods.split(' ');
-                for (var mod in mods1) {
-                    if (mod === req.session.user._id) {
-                        return mods1
-                    }
+                // for (var mod in mods1) {
+                //     if (mod === req.session.user._id) {
+                //         return mods1
+                //     }
                 mods1.push(req.session.user._id);
                 return mods1
-            }}();
+            }();
 
             // Add chatroom to database
             ChatroomModel.findOne({ name: chatroom }, function(err, room) {
@@ -225,7 +225,8 @@ app.post('/create',
                       _id: mongoose.Types.ObjectId(),
                       name: chatroom,
                       mods: mods,
-                      messages: []
+                      messages: [],
+                      activeUserCount: 0
                     })
                     newChat.save(function (error) {
                       if (error) {
@@ -234,6 +235,7 @@ app.post('/create',
                         return
                       }
                     })
+                    console.log("user count: " + newChat.userCount);
                     console.log("Chatroon with name " + chatroom + " created.")
                     res.redirect('/chat/' + newChat._id);
                 }
@@ -351,10 +353,20 @@ app.get('/api/chatrooms/name/:name', cas.block, function(req,res){
 var chat = io.sockets.on('connection', function(socket){
     // Handle user connection
     socket.on('cnct', function(data){
-        console.log("connected to room " + data.roomId);
         socket.username = data.alias;
         socket.room = data.roomId;
         socket.join(data.roomId);
+        ChatroomModel.findOne({_id: data.roomId}, function(err, room) {
+            if (err) {
+                console.log(error)
+                res.sendStatus(500);
+                return
+            }
+            room.activeUserCount++;
+            room.save(function (error) {
+                if (error) {console.log(error); res.sendStatus(500); return }
+            })
+        })
         socket.broadcast.to(data.roomId).emit('joined', data);
     });
 
@@ -390,18 +402,41 @@ var chat = io.sockets.on('connection', function(socket){
         })
     });
 
+    // Return number of online users from database
+    socket.on('user count', function(data, callback){
+        ChatroomModel.findOne({_id: data.roomId}, function(err, room) {
+            if (err) {
+                console.log(error)
+                res.sendStatus(500);
+                return
+            }
+            callback(room.activeUserCount);
+        })
+    });
+
     // Delete a message
     socket.on('delete', function(data){
         socket.broadcast.to(data.roomId).emit('delete', {msgId: data.msgId});
-    })
+    });
 
     // Handle disconnected user
     socket.on('disconnect', function() {
-        console.log("disconnected from " + socket.room)
         socket.broadcast.to(this.room).emit('left', {
             room: this.room,
             alias: this.username
         });
+        //update number of active users
+        ChatroomModel.findOne({_id: this.room}, function(err, room) {
+            if (err) {
+                console.log(error)
+                res.sendStatus(500);
+                return
+            }
+            room.activeUserCount--;
+            room.save(function (error) {
+                if (error) {console.log(error); res.sendStatus(500); return }
+            })
+        })
         // leave the room
         socket.leave(socket.room);
     });
