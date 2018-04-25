@@ -157,19 +157,19 @@ $(function () {
       li.find('p').text(msg);
       messages.append(li);
 
-      if (who != 'me') {
-        if (userToColor[msg_netid] == null) {
-        var color = "hsl(" + 360 * Math.random() + ',' +
-                 (25 + 70 * Math.random()) + '%,' + 
-                 (85 + 10 * Math.random()) + '%)';
-        userToColor[msg_netid] = color;
-        }
-        li.css("background-color", userToColor[msg_netid]);
-      }
+      // Assign a random color to each user
+      // if (userToColor[msg_netid] != msg_netid) {
+      //   var color = randomColor({luminosity: 'light'}); // a hex code for an attractive color 
+      //   userToColor[msg_netid] = color;
+      // }
+      // li.css("background-color", userToColor[msg_netid]);
+      // li.css("color", "rgb(51, 51, 51)")  
 
       if (mods.includes(netid)) {displayModOnly();}
       scrollToBottom();
     }
+
+
 
     // Create status messages
     function createStatusMessage(usr_alias, usr_netid, status) {
