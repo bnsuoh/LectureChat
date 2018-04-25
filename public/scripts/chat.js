@@ -28,6 +28,7 @@ var mods = []  // list of mods
 var numOfUsers = 0
 
 var socket = null;
+var userToColor = {}
 
 $(function () {
 
@@ -155,6 +156,17 @@ $(function () {
 
       li.find('p').text(msg);
       messages.append(li);
+
+      if (who != 'me') {
+        if (userToColor[msg_netid] == null) {
+        var color = "hsl(" + 360 * Math.random() + ',' +
+                 (25 + 70 * Math.random()) + '%,' + 
+                 (85 + 10 * Math.random()) + '%)';
+        userToColor[msg_netid] = color;
+        }
+        li.css("background-color", userToColor[msg_netid]);
+      }
+
       if (mods.includes(netid)) {displayModOnly();}
       scrollToBottom();
     }
