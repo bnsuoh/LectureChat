@@ -1,6 +1,7 @@
 var messages = $("#messages");
 var messageBox = $('#m');
 var userCountLabel = $('#user-count');
+var updateChatSubmit = $('#update-chat-button');
 
 // Client alias
 var alias = null;
@@ -20,6 +21,7 @@ $.getJSON('/api/netid', function(data){
 
 // id of room
 var roomId = String(window.location.href.match(/\/chat\/(.*)$/)[1]);
+var roomName = null;
 var mods = []  // list of mods
 var numOfUsers = 0
 
@@ -45,6 +47,7 @@ $(function () {
 
     // A user left the chatroom
     socket.on('left', function(data) {
+      updateNumberOfUsers();
       // createStatusMessage(data.alias, "left");
     })
 
@@ -60,7 +63,7 @@ $(function () {
     });
 
     // send messages
-    $('form').submit(function(){
+    $('#message-form').submit(function(){
       msgId = 0;
       msg = messageBox.val()
       socket.emit('chat message', 
@@ -70,6 +73,26 @@ $(function () {
         });
       messageBox.val('');
       return false;
+    });
+
+    // Submit edit form
+    updateChatSubmit.click(function (event) {
+      var keypressed = event.keyCode || event.which;
+      if (keypressed == 13) {
+        event.preventDefault();
+      }
+      var newName = document.getElementById("chatroom-field").value;
+      var newMods = document.getElementById("mod-field").value.split(' ');
+      if (!newMods.includes(netid)) {newMods.push(netid);}
+      $.post('/chat/' + roomId + '/edit', {
+          chatroom: newName,
+          moderators: newMods,
+          id: roomId
+        }, function(data){
+          console.log(data);  
+      })
+      $('#chat-title').html('<b>Room:</b> ' + newName);
+      $('#edit-chat').modal('toggle');
     });
 
     // Send message by clicking Enter but don't refresh the page
@@ -92,14 +115,14 @@ $(function () {
       if (mods.includes(msg_netid)) { user = '<span class="glyphicon glyphicon-user"></span>' + msg_netid }
       var li = $(
         '<li id=' + msg_id + 
-          ' class="msg ' + who + '">'+ (mods.includes(netid)? 
-          '<a class="glyphicon glyphicon-remove mod-only deleteButton" onclick="deleteMessage(\'' + msg_id + '\');"></a>':'') +
+          ' class="msg ' + who + '">'+
+          '<a class="glyphicon glyphicon-remove mod-only deleteButton" onclick="deleteMessage(\'' + msg_id + '\');"></a>'+
           '<b>' + user + '</b> <p style="display:inline">' + msg + '</p>' +
         '</li>');
 
       li.find('p').text(msg);
-      // li.find('b').text(user + ":");
       messages.append(li);
+      if (mods.includes(netid)) {displayModOnly();}
       scrollToBottom();
     }
 
@@ -123,6 +146,7 @@ $(function () {
       $.get('/api/chatrooms/id/' + roomId, {}, function(data){
         if (data != null) { 
           mods = data.mods; 
+          roomName = data.name;
           for (i in data.messages) {
             createChatMessage(data.messages[i].text, 
               data.messages[i].senderAlias,
@@ -130,7 +154,7 @@ $(function () {
               data.messages[i]._id)
           }
         }
-        // createStatusMessage(alias, netid, "joined");
+        if (mods.includes(netid)) { displayModOnly(); }
       }); 
     }
 
@@ -144,7 +168,18 @@ $(function () {
 
     // Scroll to the bottom of chat
     function scrollToBottom() {
-      window.scrollTo(0,document.body.scrollHeight);
+      window.scrollTo(0, document.body.scrollHeight);
+    }
+
+    // Display mod only divs and populate edit form
+    function displayModOnly() {
+      document.getElementById("chatroom-field").value = roomName;
+      var modList = ""
+      for (i in mods) {
+        modList += mods[i] + " "
+      }
+      document.getElementById("mod-field").value = modList.trim();
+      $(".mod-only").show();
     }
 });
 

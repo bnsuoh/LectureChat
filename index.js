@@ -203,10 +203,11 @@ app.post('/create',
             var chatroom = req.body.chatroom // name of chatroom
             var mods = function() { // Netids of mods
                 var mods1 = req.body.mods.split(' ');
-                // for (var mod in mods1) {
-                //     if (mod === req.session.user._id) {
-                //         return mods1
-                //     }
+                for (var i in mods1) {
+                    if (mods1[i] === req.session.user._id) {
+                        return mods1
+                    }
+                }
                 mods1.push(req.session.user._id);
                 return mods1
             }();
@@ -362,10 +363,13 @@ var chat = io.sockets.on('connection', function(socket){
                 res.sendStatus(500);
                 return
             }
-            room.activeUserCount = room.activeUserCount + 1 || 1;
-            room.save(function (error) {
-                if (error) {console.log(error); res.sendStatus(500); return }
-            })
+            if (room != null) {
+                room.activeUserCount = room.activeUserCount + 1 || 1;
+                room.save(function (error) {
+                    if (error) {console.log(error); res.sendStatus(500); return }
+                })
+            }
+            else {console.log("error with room info")}
         })
         socket.broadcast.to(data.roomId).emit('joined', data);
     });
@@ -410,7 +414,8 @@ var chat = io.sockets.on('connection', function(socket){
                 res.sendStatus(500);
                 return
             }
-            callback(room.activeUserCount);
+            if (room != null){ callback(room.activeUserCount); }
+            else { callback("N/A"); }
         })
     });
 
@@ -432,12 +437,50 @@ var chat = io.sockets.on('connection', function(socket){
                 res.sendStatus(500);
                 return
             }
-            room.activeUserCount = room.activeUserCount - 1 || 0;
-            room.save(function (error) {
-                if (error) {console.log(error); res.sendStatus(500); return }
-            })
+            if (room != null) {
+                room.activeUserCount = room.activeUserCount - 1 || 0;
+                room.save(function (error) {
+                    if (error) {console.log(error); res.sendStatus(500); return }
+                })
+            }
         })
         // leave the room
         socket.leave(socket.room);
     });
 });
+
+// Create chat room after form is submitted
+app.post('/chat/:id/edit', 
+    form(
+        field("chatroom").trim().required().is(/^[a-z\d\-_\s]+$/i),
+        field("moderators").trim().is(/^[a-z\d\-_\s]+$/i),
+        field("id")
+    ),
+    function(req,res) {
+        if (req.form.isValid) {
+            ChatroomModel.findOne({ _id: req.body.id }, function(err, room) {
+            if (err) {
+                console.log(error)
+                res.sendStatus(500)
+                return
+            }
+            // If the chat with id doesn't exist, there is an error
+            if (room == null) {
+                console.log(error)
+                res.sendStatus(500)
+                return
+            }
+            // Else, update the chat
+            room.name = req.body.chatroom;
+            room.mods = req.body.moderators;
+            room.save(function (error) {
+                if (error) {
+                    console.log(error)
+                    res.sendStatus(500)
+                    return
+                }
+            })
+            console.log("Updated room " + req.body.id)
+            res.sendStatus(200);
+        });
+}});

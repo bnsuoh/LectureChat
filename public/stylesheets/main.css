@@ -379,3 +379,41 @@ body {
 #chat-page #chat-title {
   float:left;
 }
+
+#chat-page #edit-button {
+  margin: 10px;
+  float: left;
+  background: var(--third-color);
+  border: none;
+  text-decoration: none;
+  font-weight: 800;
+}
+
+#chat-page #edit-button:hover {
+  /*background: var(--third-color) - #444;*/
+  opacity: 0.5;
+}
+
+#edit-chat form {
+  padding: 5%;
+}
+
+#edit-chat #update-chat-button {
+  color: var(--second-color);
+  border: 3px solid var(--second-color);
+  float: center;
+}
+
+#edit-chat #update-chat-button:hover {
+  color: #fff;
+  border: 3px solid var(--second-color);
+  background-color: var(--second-color);
+}
+
+#edit-chat .button-holder { 
+  text-align: center; 
+}
+
+.mod-only {
+  display: none;
+}

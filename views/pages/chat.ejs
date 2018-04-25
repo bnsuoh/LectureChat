@@ -13,6 +13,7 @@
         <div class="text-center" id="chat-title-holder">
           <div class="container">
             <h4 id="chat-title"><b>Room:</b> <%= chatroom %></h4>
+            <button id="edit-button" class="mod-only" data-toggle="modal" data-target="#edit-chat">Edit</button>
             <h4 id="user-count"></h4>
           </div>
         </div>
@@ -25,13 +26,41 @@
         
         <footer>
           <div id="message-box" class="container">
-            <form action="">
-              <button><span class="glyphicon glyphicon-send"></span></button>
+            <form action="" id="message-form">
+              <button name="post-message-button"><span class="glyphicon glyphicon-send"></span></button>
               <textarea type="submit" id="m" autocomplete="off"></textarea>
             </form>
           </div>
         </footer>
       </div>
+      <div id="edit-chat" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+          <!-- Modal content-->
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+              <h4 class="modal-title">Edit chat room</h4>
+            </div>
+            <div class="modal-body">
+              <form id="edit-form" onsubmit="return submitEdit();">
+                <div class="form-group">
+                  <label for="chatroom-name-label">Chatroom name:</label>
+                  <input class="form-control" type="text" name="chatroom" id="chatroom-field"></textarea>
+                  <small id="netid-help" class="form-text text-muted">e.g. COS 461</small>
+                </div>
+                <div class="form-group">
+                  <label for="moderator-label">Moderator netids:</label>
+                  <input class="form-control" type="text" name="mods" id="mod-field" value=""></textarea>
+                  <small id="netid-help" class="form-text text-muted">Separate netids using space</small>
+                </div>
+                <div class="button-holder">
+                  <button type="button" class="btn btn-lg btn-default" data-toggle="modal" name="update-chat-button" id="update-chat-button">Update</button>
+                </div>
+              </form>
+          </div>
+
+      </div>
+    </div>
     <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="../scripts/chat.js"></script>
