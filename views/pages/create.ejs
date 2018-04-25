@@ -12,19 +12,19 @@
     <div id="create-chat-page">
       <div class="container main-panel">
         <div class="row">
-          <form class="col-md-6 col-md-offset-3" onsubmit="return checkFields(this)" action="/create" method="post" >
+          <form class="col-md-6 col-md-offset-3">
             <div class="form-group">
               <label for="chatroom-name-label">Chatroom name:</label>
               <input class="form-control" type="text" name="chatroom" id="chatroom-field"></textarea>
-              <small id="netid-help" class="form-text text-muted">e.g. COS 461</small>
+              <small id="name-help" class="form-text text-muted">e.g. COS 461</small>
             </div>
             <div class="form-group">
               <label for="moderator-label">Moderator netids:</label>
               <input class="form-control" type="text" name="mods" id="mod-field" value=""></textarea>
-              <small id="netid-help" class="form-text text-muted">Separate netids using space</small>
+              <small id="mods-help" class="form-text text-muted">Separate netids using space</small>
             </div>
             <div class="button-holder">
-              <button type="submit" class="btn btn-lg btn-default">Create</button>
+              <button type="button" class="btn btn-lg btn-default" name="create-chat-button" id="create-chat-button">Create</button>
             </div>
           </form>
         </div>

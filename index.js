@@ -196,19 +196,20 @@ app.get('/create', [cas.bounce, set_session], function(req,res){
 app.post('/create', 
     form(
         field("chatroom").trim().required().is(/^[a-z\d\-_\s]+$/i),
-        field("moderators").trim().is(/^[a-z\d\-_\s]+$/i)
+        field("moderators").trim().is(/^[a-z\d\-_\s]+$/i),
+        field("netid")
     ),
     function(req,res) {
         if (req.form.isValid) {
             var chatroom = req.body.chatroom // name of chatroom
             var mods = function() { // Netids of mods
-                var mods1 = req.body.mods.split(' ');
+                var mods1 = req.body.moderators.split(' ');
                 for (var i in mods1) {
-                    if (mods1[i] === req.session.user._id) {
+                    if (mods1[i] === req.body.netid) {
                         return mods1
                     }
                 }
-                mods1.push(req.session.user._id);
+                mods1.push(req.body.netid);
                 return mods1
             }();
 
@@ -232,23 +233,22 @@ app.post('/create',
                     newChat.save(function (error) {
                       if (error) {
                         console.log(error)
-                        res.sendStatus(500)
+                        res.send({statusCode:500, message:"An error occured."})
                         return
                       }
                     })
-                    console.log("user count: " + newChat.userCount);
-                    console.log("Chatroon with name " + chatroom + " created.")
-                    res.redirect('/chat/' + newChat._id);
+                    console.log("Chatroom with name " + chatroom + " created.")
+                    res.send({statusCode:200, redirectUrl:'/chat/' + newChat._id})
                 }
                 else {
                     // TODO: add error message
-                    res.redirect('/create');
+                    res.send({statusCode:500, message:"Chatroom with this name already exists."});
                 }
             });
             
         } else {
             // TODO: add error message
-            res.redirect('/create');
+            res.send({statusCode:500, message:"An error occured."})
         }
 });
 

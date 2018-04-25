@@ -417,3 +417,7 @@ body {
 .mod-only {
   display: none;
 }
+
+.form-control {
+  border: 1px solid #777;
+}

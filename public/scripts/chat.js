@@ -2,6 +2,8 @@ var messages = $("#messages");
 var messageBox = $('#m');
 var userCountLabel = $('#user-count');
 var updateChatSubmit = $('#update-chat-button');
+var updateNameHelpLabel = document.getElementById('name-help')
+var updateModsHelpLabel = document.getElementById('mods-help')
 
 // Client alias
 var alias = null;
@@ -75,14 +77,41 @@ $(function () {
       return false;
     });
 
+    function highlightBorder(element, label, color, message) {
+      element.style.borderColor = color;
+      label.innerText = message;
+      label.style.color = color;
+    }
+
+    // Is form input valid
+    function isValid(text) {
+      var re = /^[a-z\d\-_\s]+$/i;
+      return re.test(text);
+    }
+
     // Submit edit form
     updateChatSubmit.click(function (event) {
       var keypressed = event.keyCode || event.which;
       if (keypressed == 13) {
         event.preventDefault();
       }
-      var newName = document.getElementById("chatroom-field").value;
-      var newMods = document.getElementById("mod-field").value.split(' ');
+      var newName = document.getElementById("chatroom-field");
+      var newMods = document.getElementById("mod-field");
+      if (!isValid(newName.value)) {
+        highlightBorder(newName, updateNameHelpLabel, "red", "You can only use alphanumerical characters, spaces, "+ "- and _")
+        return;
+      }
+      highlightBorder(newName, updateNameHelpLabel, "#777", "e.g. COS 461")
+
+      if (!isValid(newMods.value)) {
+        highlightBorder(newMods, updateModsHelpLabel, "red", "Only use alphanumerical characters and spaces." + 
+          "Use spaces to separate netids.")
+        return;
+      }
+      highlightBorder(newMods, updateModsHelpLabel, "#777", "Separate netids using spaces")
+
+      newName = newName.value.trim();
+      newMods = newMods.value.trim().split(' ')
       if (!newMods.includes(netid)) {newMods.push(netid);}
       $.post('/chat/' + roomId + '/edit', {
           chatroom: newName,
