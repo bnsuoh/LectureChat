@@ -89,9 +89,13 @@ $(function () {
           moderators: newMods,
           id: roomId
         }, function(data){
-          console.log(data);  
+          if(data === "OK") {
+            $('#chat-title').html('<b>Room:</b> ' + newName);
+          }
+          else {
+            alert("You are not authorized to edit this chat room, or an error occured.")
+          }
       })
-      $('#chat-title').html('<b>Room:</b> ' + newName);
       $('#edit-chat').modal('toggle');
     });
 

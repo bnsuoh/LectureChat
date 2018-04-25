@@ -454,7 +454,7 @@ app.post('/chat/:id/edit',
     form(
         field("chatroom").trim().required().is(/^[a-z\d\-_\s]+$/i),
         field("moderators").trim().is(/^[a-z\d\-_\s]+$/i),
-        field("id")
+        field("id"),
     ),
     function(req,res) {
         if (req.form.isValid) {
@@ -471,16 +471,22 @@ app.post('/chat/:id/edit',
                 return
             }
             // Else, update the chat
-            room.name = req.body.chatroom;
-            room.mods = req.body.moderators;
-            room.save(function (error) {
-                if (error) {
-                    console.log(error)
-                    res.sendStatus(500)
-                    return
-                }
-            })
-            console.log("Updated room " + req.body.id)
-            res.sendStatus(200);
+            if (room.mods.includes(req.session.user._id)) {
+                room.name = req.body.chatroom;
+                room.mods = req.body.moderators;
+                room.save(function (error) {
+                    if (error) {
+                        console.log(error)
+                        res.sendStatus(500)
+                        return
+                    }
+                })
+                console.log("Updated room " + req.body.id)
+                res.sendStatus(200);
+            }
+            else {
+                console.log("Unauthorized edit request by " + req.session.user._id);
+                res.sendStatus(500, "Not authorized");;
+            }
         });
 }});
