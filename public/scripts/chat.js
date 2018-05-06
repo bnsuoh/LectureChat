@@ -140,13 +140,28 @@ $(function () {
 
     // Add new chat message
     function createChatMessage(msg, msg_alias, msg_netid, msg_id){
-      // Message sender
-      var who = 'other';
-      if (msg_netid === netid) { who = 'me' } //from self
-      if (mods.includes(msg_netid)) { who += ' mod' } //from mod
+      // Identify essage sender
 
+      // Message is from other users
+      var who = 'other';
       var user = msg_alias;
-      if (mods.includes(msg_netid)) { user = '<span class="glyphicon glyphicon-user"></span>' + msg_netid }
+
+      // If current user is a mod, display netid of messages instead of alias
+      if (mods.includes(netid)) {
+        user = msg_netid;
+      }
+
+      // Message is from self
+      if (msg_netid === netid) { 
+        who = 'me' 
+      } 
+
+      // Message is from a mod
+      if (mods.includes(msg_netid)) {
+        who += ' mod' 
+        user = '<span class="glyphicon glyphicon-user"></span>' + msg_netid;
+      } 
+      
       var li = $(
         '<li id=' + msg_id + 
           ' class="msg ' + who + '">'+

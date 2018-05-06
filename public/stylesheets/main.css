@@ -414,6 +414,11 @@ body {
   text-align: center; 
 }
 
+#edit-chat #delete-room-link {
+  color: var(--third-color);
+  cursor: pointer;
+}
+
 .mod-only {
   display: none;
 }
