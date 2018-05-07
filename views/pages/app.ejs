@@ -13,10 +13,11 @@
       <row>
         <h2>Hello there, <span id=netid><%= session.user._id %></span>!</h2>
         <h4>Your anonymous alias is <span id=alias><%= session.user.alias %></span>. Please continue by choosing an option from below:</h4>
-        <a type="button" class="btn btn-lg btn-default" href="/create">Create a New Chat</a>
-        <a type="button" class="btn btn-lg btn-default" href="/search">Find an Existing Chat</a>
+        <a type="button" class="btn btn-lg btn-default" id="createButton" href="/create">Create a New Chat</a>
+        <a type="button" class="btn btn-lg btn-default" id="findButton" href="/search">Find an Existing Chat</a>
       </row>
     </div>
   </div>
+  <script src="../scripts/app.js"></script>
 </body>
 </html>

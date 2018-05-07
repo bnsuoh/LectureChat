@@ -31,7 +31,6 @@ var socket = null;
 var userToColor = {}
 
 $(function () {
-
     // Connect to socket
     socket = io();
     
@@ -253,3 +252,7 @@ function deleteMessage(msg_id){
     }
   });
 };
+
+function deleChatroom() {
+
+}

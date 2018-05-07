@@ -85,14 +85,11 @@ var cas = new CASAuthentication({
  
 // Unauthenticated clients will be redirected to the CAS login and then back to 
 // this route once authenticated. 
-app.get('/login', cas.bounce, function ( req, res ) {
+app.get('/login', cas.bounce, function (req, res) {
     
     // Netid attached to current session, if it exists
     // Netid attached to current session, if it exists
     var netid = req.session[cas.session_name]
-    // console.log(cas);
-    // console.log(req.session[cas.session_info])
-
     UserModel.findById(netid, function (err, user) {
         if (err) {
             console.log(err)
@@ -165,6 +162,17 @@ var set_session = function(req, res, next) {
     next();
 }
 
+// Return true if logged in user is an undergraduate student
+app.get('/api/isUndergrad', cas.block, function(req,res) {
+    // If user is bsicim, return false for mod access
+    if (req.session[cas.session_name] === 'bsicim') {
+        res.send(false);
+    }
+    else {
+        res.send(req.session[cas.session_info]['employeeType'] === 'undergraduate');
+    }
+})
+
 // This route will de-authenticate the client with the Express server and then 
 // redirect the client to the CAS logout page. 
 app.get( '/logout', [remove_session, cas.logout], function(req,res) {
@@ -187,9 +195,16 @@ app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 
 // Redirect to chatroom creation page
 app.get('/create', [cas.bounce, set_session], function(req,res){
-    res.render("pages/create", {
-        session: req.session
-    });
+    var isUndergrad = (req.session[cas.session_info]['employeeType'] === 'undergraduate'
+        && req.session[cas.session_name] != 'bsicim');
+    if (isUndergrad) {
+        res.send("You are not authorized to create a chatroom.");
+    }
+    else {
+        res.render("pages/create", {
+            session: req.session
+        });
+    }
 });
 
 // Create chat room after form is submitted
@@ -241,13 +256,11 @@ app.post('/create',
                     res.send({statusCode:200, redirectUrl:'/chat/' + newChat._id})
                 }
                 else {
-                    // TODO: add error message
                     res.send({statusCode:500, message:"Chatroom with this name already exists."});
                 }
             });
             
         } else {
-            // TODO: add error message
             res.send({statusCode:500, message:"An error occured."})
         }
 });
