@@ -166,7 +166,7 @@ var set_session = function(req, res, next) {
 app.get('/api/isUndergrad', cas.block, function(req,res) {
     // If user is bsicim, return false for mod access
     if (req.session[cas.session_name] === 'bsicim') {
-        res.send(false);
+        res.send(true);
     }
     else {
         res.send(req.session[cas.session_info]['employeeType'] === 'undergraduate');
