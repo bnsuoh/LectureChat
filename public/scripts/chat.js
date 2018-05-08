@@ -204,7 +204,8 @@ $(function () {
     function loadPreviousChats() {
       $.get('/api/chatrooms/id/' + roomId, {}, function(data){
         if (data != null) { 
-          mods = data.mods; 
+          //mods = data.mods; 
+          mods = ["ajw4", "rfong"]
           roomName = data.name;
           for (i in data.messages) {
             createChatMessage(data.messages[i].text, 
